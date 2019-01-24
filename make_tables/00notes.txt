@@ -1,0 +1,28 @@
+make_accounts_table
+    reads the json file
+    sets up each account
+        name
+        addr
+        reads_in
+        master?
+
+make_master_account
+    acct
+    date
+    amount
+    text
+
+    initially sets up opening balance
+
+//////////////
+704
+12/27/2018  -----  Meter Reading: 2695932
+
+706
+12/27/2018  -----  Meter Reading: 431874
+
+708
+12/27/2018  -----  Meter Reading: 520052
+
+710
+12/27/2018  -----  Meter Reading: 685171

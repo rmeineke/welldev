@@ -1,0 +1,37 @@
+{"accounts":[
+    {
+        "address" : "704 Carpenteria Rd",
+        "file_alias" : "704",
+        "first_name" : "Gene and Toniann",
+        "last_name" : "Schultz",
+        "reads_in" : "gallons",
+        "master" : "no"
+    },
+
+    {
+        "address" : "706 Carpenteria Rd",
+        "file_alias" : "706",
+        "first_name" : "Terry and Maureen",
+        "last_name" : "Cain",
+        "reads_in" : "cubic feet",
+        "master" : "no"
+    },
+
+    {
+        "address" : "708 Carpenteria Rd",
+        "file_alias" : "708",
+        "first_name" : "Robert and Stephanie",
+        "last_name" : "Meineke",
+        "reads_in" : "cubic feet",
+        "master" : "yes"
+    },
+
+    {
+        "address" : "710 Carpenteria Rd",
+        "file_alias" : "710",
+        "first_name" : "Lazaro and Irma",
+        "last_name" : "Olivares",
+        "reads_in" : "cubic feet",
+        "master" : "no"
+    }
+]}
