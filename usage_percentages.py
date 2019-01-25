@@ -28,7 +28,7 @@ def main():
 
     cur.execute('SELECT * FROM accounts')
     rows = cur.fetchall()
-    logger.debug(rows)
+    # logger.debug(rows)
 
     acct_list = []
     total_usage = 0.0
@@ -50,6 +50,7 @@ def main():
         for row in rows:
             readings_list.append(row['reading'])  # this retrieval by name seems to be fine
 
+        logger.debug(f'reads in: {acct_obj.reads_in}')
         logger.debug(f'readings_list: {readings_list}')
         acct_obj.latest_reading = readings_list[0]
         acct_obj.previous_reading = readings_list[1]
@@ -57,7 +58,6 @@ def main():
         acct_obj.calculate_current_usage()
         logger.debug(f'current usage: {acct_obj.current_usage}')
 
-        logger.debug(f'reads in: {acct_obj.reads_in} .. prev reading: {acct_obj.previous_reading}')
         total_usage += acct_obj.current_usage
 
 
@@ -66,7 +66,7 @@ def main():
     percents_total = 0
     for a in acct_list:
         a.current_usage_percent = round(a.current_usage / total_usage * 100, 2)
-        print(f'{a.ln}: {a.current_usage_percent}')
+        print(f'{a.ln:20} ... {a.current_usage_percent}%')
         percents_total += a.current_usage_percent
 
     print(f'percents_total: {percents_total}')

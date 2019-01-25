@@ -24,6 +24,9 @@ def main():
 
     logger = logging.getLogger()
     logger.debug('Entering main')
+
+    # make sure this gets backed up prior to any
+    # writing of the db
     utils.backup_file(logger, database)
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
@@ -47,7 +50,7 @@ def main():
     # instantiate an obj for each of the accounts
     cur.execute("SELECT * FROM accounts")
     rows = cur.fetchall()
-    logger.debug(rows)
+    # logger.debug(rows)
 
     acct_list = []
     total_usage = 0.0
@@ -130,6 +133,8 @@ def main():
     print(f'============================================================================')
     print(f'==> assessment_total: {assessment_total / 100:.2f}')
     print(f'============================================================================')
+    cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) '
+                'VALUES (?, ?, ?)', (6, date, assessment_total))
 
     # save, then close the cursor and db
     db.commit()

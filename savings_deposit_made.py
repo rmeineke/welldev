@@ -3,6 +3,7 @@ import sys
 import sqlite3
 from lib import utils
 
+# savings dep made
 
 def main():
     database = 'well.db'
@@ -26,15 +27,35 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
+    # present the last savings assessment here ...
+    # lite > select
+    # transaction_amount
+    # from transactions_log;
+    # 0
+    # 0
+    # 10000
+    # 4240
+    # -10000
+    # sqlite > select
+    # transaction_amount
+    # from transactions_log where
+    # transaction_type = 6;
+    # 4240
+    # sqlite >
+    #
+
+    cur.execute('SELECT transaction_amount FROM transactions_log WHERE transaction_type = 6')
+    last_assessment = cur.fetchone()[0]
+    print(f'last_assessment: {last_assessment / 100:.2f}')
     # get date_paid
-    payment_date = utils.prompt_for_current_date(logger, "Date paid")
+    deposit_date = utils.prompt_for_current_date(logger, "Date deposit made")
     # get amount
-    payment_amount = utils.get_amount(logger, "Amount paid")
+    deposit_amount = utils.get_amount(logger, "Amount of deposit")
 
     # insert into the transaction log
-    payment_amount = payment_amount * -1
+    deposit_amount = deposit_amount * -1
     cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)',
-                (4, payment_date, payment_amount))
+                (7, deposit_date, deposit_amount))
 
     # mark the main account as paid
     cur.execute('SELECT acct_id FROM accounts WHERE master = "yes"')
@@ -45,14 +66,14 @@ def main():
 
     # go to the master account
     # find the last billing amount
-    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%PGE Bill Share%"')
-    last_billing_amt = cur.fetchone()[0]
-    logger.debug(f'last_billing_amt: {last_billing_amt}')
+    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%Savings Assessment%"')
+    last_savings_assessment = cur.fetchone()[0]
+    logger.debug(f'last_billing_amt: {last_savings_assessment}')
 
     # credit the master account with the equivalent payment
-    last_billing_amt = last_billing_amt * -1
+    last_savings_assessment = last_savings_assessment * -1
     cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?,?,?,?)',
-                (master_acct_id, payment_date, last_billing_amt , "PGE Bill Paid"))
+                (master_acct_id, deposit_date, last_savings_assessment, "Savings Deposit"))
 
     # save, then close the cursor and db
     db.commit()
