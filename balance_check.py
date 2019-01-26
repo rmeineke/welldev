@@ -21,7 +21,7 @@ def main():
 
     logger = logging.getLogger()
     logger.debug('Entering main')
-    logger.debug(datetime.date.today().isoformat())
+    # logger.debug(datetime.date.today().isoformat())
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row

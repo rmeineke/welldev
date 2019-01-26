@@ -12,9 +12,9 @@ def backup_file(logger, fn):
 
     dt = datetime.datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
 
-    new_fname = os.path.join(backup_directory, dt + '__' + fn)
-    logger.debug(f'backing up to: {new_fname}')
-    copyfile(fn, new_fname)
+    new_filename = os.path.join(backup_directory, dt + '__' + fn)
+    logger.debug(f'backing up to: {new_filename}')
+    copyfile(fn, new_filename)
 
 
 def get_amount(logger, prompt):
@@ -77,6 +77,14 @@ def prompt_for_account(logger, prompt, cur):
 
 
 def get_savings_balance(logger, db):
+    # this is way neater than what follows
+    logger.debug('Entering get_savings_balance()')
+    row = cur.execute("SELECT sum(amount) FROM savings_account")
+    cur_balance = row.fetchone()[0]
+    return cur_balance
+
+
+def get_savings_balance(logger, db):
     logger.debug('Entering get_savings_balance()')
     savings_balance = 0
 
@@ -96,3 +104,13 @@ def get_savings_balance(logger, db):
     db.close()
 
     return savings_balance
+
+
+def get_balance_from_transaction_log(db, logger):
+    db = sqlite3.connect(db)
+    cur = db.cursor()
+    row = cur.execute("SELECT SUM(transaction_amount) FROM transactions_log WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7")
+    cur_balance = row.fetchone()[0]
+    cur.close()
+    db.close()
+    return cur_balance

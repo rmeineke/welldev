@@ -107,3 +107,4 @@ venv.bak/
 misc/*
 backups/*
 .idea/*
+test.py

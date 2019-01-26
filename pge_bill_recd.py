@@ -33,24 +33,17 @@ def main():
     cur = db.cursor()
 
     # prompt for amount of the bill .. and date
-    pge_bill = float(utils.get_amount(logger, 'PGE Bill'))
+    bill_date = utils.prompt_for_current_date(logger, 'Date of bill')
+    pge_bill = float(utils.get_amount(logger, 'PGE bill amount'))
     logger.debug(f'pge_bill: {int(pge_bill)}')
-    date = utils.prompt_for_current_date(logger, 'Date of bill')
 
     # insert into the transaction log
     cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)',
-                (5, date, pge_bill))
-
-    # not even sure what this does...or why it is here
-    # oh, wait ... this marks the pge bill as paid
-    # negated_bill = pge_bill * -1
-    # cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)',
-    #             (4, date, negated_bill))
+                (5, bill_date, pge_bill))
 
     # instantiate an obj for each of the accounts
     cur.execute("SELECT * FROM accounts")
     rows = cur.fetchall()
-    # logger.debug(rows)
 
     acct_list = []
     total_usage = 0.0
@@ -90,14 +83,13 @@ def main():
 
     assessment_total = 0
     for a in acct_list:
-        logger.debug('')
-        logger.debug(a.addr)
+        logger.debug(f'\n\n{a.addr}')
         logger.debug(f'current_usage_percent: {a.current_usage_percent}')
         logger.debug(f'{(a.current_usage / total_usage) * 100}')
         logger.debug(f'{total_usage}')
 
         a.current_usage_percent = round((a.current_usage / total_usage) * 100, 2)
-        logger.debug('current_usage_percent: {:.2f}'.format(a.current_usage_percent))
+        logger.debug(f'current_usage_percent: {a.current_usage_percent:.2f}')
         logger.debug(f'pge_bill: {pge_bill}')
         logger.debug(f'a.current_usage_percent: {a.current_usage_percent}')
 
@@ -106,11 +98,11 @@ def main():
         # print(f' >>>>>>>>>>>>>>>>> {int(pge_bill * a.current_usage_percent / 100)}')
 
         a.pge_bill_share = round((pge_bill * a.current_usage_percent / 100), 0)
-        logger.debug('pge_bill_share: {}'.format(a.pge_bill_share))
-        # write this to the db - master_account table
+        logger.debug(f'pge_bill_share: {a.pge_bill_share}')
 
+        # write this share to the db - master_account table
         cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?, ?, ?, ?)',
-                    (a.acct_id, date, a.pge_bill_share, 'PGE Bill Share'))
+                    (a.acct_id, bill_date, a.pge_bill_share, 'PGE Bill Share'))
 
         # this should be moved outside ... no sense going through all
         # this if no assessment needed ...
@@ -121,11 +113,10 @@ def main():
             logger.debug(f'Assessed: {a.savings_assessment}')
             # write this to the db
             cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?, ?, ?, ?)',
-                        (a.acct_id, date, a.savings_assessment, 'Savings Assessment'))
+                        (a.acct_id, bill_date, a.savings_assessment, 'Savings Assessment'))
 
             assessment_total += a.savings_assessment
             logger.debug(f'Bill total: {round(a.savings_assessment + a.pge_bill_share,2)}')
-
         else:
             logger.debug(f'No assessment needed.')
 
@@ -134,7 +125,8 @@ def main():
     print(f'==> assessment_total: {assessment_total / 100:.2f}')
     print(f'============================================================================')
     cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) '
-                'VALUES (?, ?, ?)', (6, date, assessment_total))
+                'VALUES (?, ?, ?)',
+                (6, bill_date, assessment_total))
 
     # save, then close the cursor and db
     db.commit()
