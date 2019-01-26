@@ -3,7 +3,6 @@ import sys
 import sqlite3
 from lib import utils
 
-# savings dep made
 
 def main():
     database = 'well.db'
@@ -28,25 +27,9 @@ def main():
     cur = db.cursor()
 
     # present the last savings assessment here ...
-    # lite > select
-    # transaction_amount
-    # from transactions_log;
-    # 0
-    # 0
-    # 10000
-    # 4240
-    # -10000
-    # sqlite > select
-    # transaction_amount
-    # from transactions_log where
-    # transaction_type = 6;
-    # 4240
-    # sqlite >
-    #
-
     cur.execute('SELECT transaction_amount FROM transactions_log WHERE transaction_type = 6')
     last_assessment = cur.fetchone()[0]
-    print(f'last_assessment: {last_assessment / 100:.2f}')
+    print(f'last_assessment amount: {last_assessment / 100:.2f}')
     # get date_paid
     deposit_date = utils.prompt_for_current_date(logger, "Date deposit made")
     # get amount
@@ -74,6 +57,13 @@ def main():
     last_savings_assessment = last_savings_assessment * -1
     cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?,?,?,?)',
                 (master_acct_id, deposit_date, last_savings_assessment, "Savings Deposit"))
+
+    # prompt for notes ... 'Dep for Jan 2019' ... or similar
+    notes = utils.prompt_for_notes(logger, 'Notes for this deposit')
+    deposit_amount = deposit_amount * -1
+    # sigh, of course we then need to add the deposit to the savings account table
+    cur.execute('INSERT INTO savings_account (date, amount, notes) VALUES (?,?,?)',
+                (deposit_date, deposit_amount, notes))
 
     # save, then close the cursor and db
     db.commit()

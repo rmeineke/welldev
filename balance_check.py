@@ -27,10 +27,12 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    balances = {}
-    balances = get_account_balances(cur, logger)
-    print(balances)
+    get_account_balances(cur, logger)
+    master_bal = get_master_account_balance(cur, logger)
+    print(f'master account balance: {master_bal / 100}')
 
+    transaction_log_balance = get_transaction_log_balance(cur, logger)
+    print(f'transaction log balance: {transaction_log_balance / 100:.2f}')
     # save, then close the cursor and db
     db.commit()
     cur.close()
@@ -39,8 +41,6 @@ def main():
 
 def get_account_balances(cur, logger):
     logger.debug('Entering get_account_balances')
-    accts = {}
-
     # loop through and get acct ids
     # then get each balance and return
     cur.execute('SELECT acct_id, last_name FROM accounts')
@@ -50,8 +50,19 @@ def get_account_balances(cur, logger):
         bal = bal_row.fetchone()[0]
         print('{} -- {:10} ..... {:>8,.2f}'.format(r['acct_id'], r['last_name'], bal / 100))
 
-    accts['Schultz'] = 100
-    return accts
+
+def get_master_account_balance(cur, logger):
+    logger.debug('Entering get_master_account_balance()')
+    row = cur.execute("SELECT sum(amount) FROM master_account")
+    cur_balance = row.fetchone()[0]
+    return cur_balance
+
+
+def get_transaction_log_balance(cur, logger):
+    logger.debug('Entering get_transaction_log_balance()')
+    row = cur.execute("SELECT sum(transaction_amount) FROM transactions_log WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7")
+    cur_balance = row.fetchone()[0]
+    return cur_balance
 
 
 if __name__ == '__main__':
