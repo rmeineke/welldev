@@ -29,11 +29,9 @@ def main():
 
     cur.execute("SELECT * FROM accounts")
     rows = cur.fetchall()
-    # logger.debug(rows)
 
     acct_list = []
     total_usage = 0.0
-
     for r in rows:
         acct_obj = account.Account(
             r["acct_id"],
@@ -47,13 +45,16 @@ def main():
 
         # fetch the last two reading rows from the db
         rows = cur.execute(
-            "SELECT reading FROM readings WHERE account_id = {} ORDER BY reading_id DESC LIMIT 2".format(
-                r["acct_id"]
-            )
+            f"SELECT reading "
+            f"FROM readings "
+            f"WHERE account_id = {r['acct_id']} "
+            f"ORDER BY reading_id "
+            f"DESC "
+            f"LIMIT 2"
         )
         # near as I can tell this returns a row for each line of data found
         # the row is a list of selected items .... so 'reading' is the
-        # zeroeth item ...
+        # zero-eth item ...
         #
         # need to collect them both in a list for further processing
         readings_list = []
@@ -77,10 +78,10 @@ def main():
     percents_total = 0
     for a in acct_list:
         a.current_usage_percent = round(a.current_usage / total_usage * 100, 2)
-        print(f"{a.ln:20} ... {a.current_usage_percent}%")
+        print(f"{a.ln:20}...  {a.current_usage_percent}%")
         percents_total += a.current_usage_percent
 
-    print(f"percents_total: {percents_total}")
+    print(f"{'percents_total:':19} ... {percents_total:.2f}%")
     # save, then close the cursor and db
     db.commit()
     cur.close()
