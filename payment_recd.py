@@ -38,7 +38,7 @@ def main():
     date = utils.prompt_for_current_date(logger, 'Payment date')
 
     # fetch amount and flip the sign
-    amt = utils.get_amount(logger, 'Payment amount')
+    amt = utils.prompt_for_amount(logger, 'Payment amount')
     logger.debug(f'get_amount just returned this: {amt}')
     amt *= -1
 

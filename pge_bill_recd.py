@@ -34,7 +34,7 @@ def main():
 
     # prompt for amount of the bill .. and date
     bill_date = utils.prompt_for_current_date(logger, 'Date of bill')
-    pge_bill = float(utils.get_amount(logger, 'PGE bill amount'))
+    pge_bill = float(utils.prompt_for_amount(logger, 'PGE bill amount'))
     logger.debug(f'pge_bill: {int(pge_bill)}')
 
     # insert into the transaction log

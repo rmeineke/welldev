@@ -17,7 +17,7 @@ def backup_file(logger, fn):
     copyfile(fn, new_filename)
 
 
-def get_amount(logger, prompt):
+def prompt_for_amount(logger, prompt):
     logger.debug('entering get_amount()')
     while 1:
         try:

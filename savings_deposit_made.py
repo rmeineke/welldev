@@ -33,7 +33,7 @@ def main():
     # get date_paid
     deposit_date = utils.prompt_for_current_date(logger, "Date deposit made")
     # get amount
-    deposit_amount = utils.get_amount(logger, "Amount of deposit")
+    deposit_amount = utils.prompt_for_amount(logger, "Amount of deposit")
 
     # insert into the transaction log
     deposit_amount = deposit_amount * -1

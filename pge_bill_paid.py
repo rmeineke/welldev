@@ -29,7 +29,7 @@ def main():
     # get date_paid
     payment_date = utils.prompt_for_current_date(logger, "Date paid")
     # get amount
-    payment_amount = utils.get_amount(logger, "Amount paid")
+    payment_amount = utils.prompt_for_amount(logger, "Amount paid")
 
     # insert into the transaction log
     payment_amount = payment_amount * -1

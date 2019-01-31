@@ -29,10 +29,10 @@ def main():
 
     get_account_balances(cur, logger)
     master_bal = get_master_account_balance(cur, logger)
-    print(f'master account balance: {master_bal / 100}')
+    print(f'master account balance: {master_bal / 100:.2f}')
 
-    transaction_log_balance = get_transaction_log_balance(cur, logger)
-    print(f'transaction log balance: {transaction_log_balance / 100:.2f}')
+    # transaction_log_balance = get_transaction_log_balance(cur, logger)
+    # print(f'transaction log balance: {transaction_log_balance / 100:.2f}')
     # save, then close the cursor and db
     db.commit()
     cur.close()
@@ -60,7 +60,8 @@ def get_master_account_balance(cur, logger):
 
 def get_transaction_log_balance(cur, logger):
     logger.debug('Entering get_transaction_log_balance()')
-    row = cur.execute("SELECT sum(transaction_amount) FROM transactions_log WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7")
+    row = cur.execute("SELECT SUM(transaction_amount) FROM transactions_log WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7")
+    logger.debug(f'row: {row}')
     cur_balance = row.fetchone()[0]
     return cur_balance
 

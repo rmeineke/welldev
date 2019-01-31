@@ -48,6 +48,7 @@ def create_transaction_types_table(c, logger):
     c.execute('INSERT INTO transaction_types (transaction_type) VALUES (?)', ("Savings Deposit",))
     c.execute('INSERT INTO transaction_types (transaction_type) VALUES (?)', ("Savings Disbursement",))
     c.execute('INSERT INTO transaction_types (transaction_type) VALUES (?)', ("Monthly Reading",))
+    c.execute('INSERT INTO transaction_types (transaction_type) VALUES (?)', ("Account Adjustment",))
 
 
 if __name__ == '__main__':
