@@ -46,6 +46,8 @@ def main():
     # insert into the transaction log
     cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)', (9, adjustment_date, adjustment_amount))
 
+    # adjustment_amount = adjustment_amount * -1
+    # cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)', (9, adjustment_date, adjustment_amount))
 
     # save, then close the cursor and db
     db.commit()
