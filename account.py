@@ -42,7 +42,7 @@ class Account:
         self.current_usage = self.latest_reading - self.previous_reading
         if self.reads_in == 'cubic feet':
             self.current_usage = self.current_usage * 7.4805
-            print(f"current_usage: {self.current_usage}")
-            self.current_usage = round(self.current_usage, 2)
-            print(f"current_usage, rounded: {self.current_usage}")
+            # print(f"current_usage: {self.current_usage}")
+            # self.current_usage = round(self.current_usage, 2)
+            # print(f"current_usage, rounded: {self.current_usage}")
         self.current_usage = round(self.current_usage, 2)

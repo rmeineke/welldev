@@ -26,7 +26,6 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    reading_date = utils.prompt_for_current_date(logger, 'Reading date')
     cur.execute('INSERT INTO reading_dates (reading_date) VALUES (?)', (reading_date, ))
     last_inserted_row_id = cur.lastrowid
 
