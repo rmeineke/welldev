@@ -72,13 +72,16 @@ def main():
         logger.debug(f"current usage: {acct_obj.current_usage}")
 
         total_usage += acct_obj.current_usage
-
-    total_usage = round(total_usage, 2)
     logger.debug(f"total usage: {total_usage}")
+    total_usage = round(total_usage, 2)
+    logger.debug(f"total usage, rounded: {total_usage}")
     percents_total = 0
     for a in acct_list:
         a.current_usage_percent = round(a.current_usage / total_usage * 100, 2)
+        # print(f"{a.ln:20}...  {a.current_usage / total_usage * 100}%")
         print(f"{a.ln:20}...  {a.current_usage_percent}%")
+
+        logger.debug(f"{a.current_usage / total_usage * 100}")
         percents_total += a.current_usage_percent
 
     print(f"{'percents_total:':19} ... {percents_total:.2f}%")
