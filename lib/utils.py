@@ -60,11 +60,11 @@ def prompt_for_account(logger, prompt, cur):
     rows = cur.fetchall()
     acct_list = []
     for r in rows:
-        print("{}: {}".format(r[0], r[2]))
+        print(f"{r[0]}: {r[2]}")
         acct_list.append(r[0])
 
     while True:
-        acct = input("{}: ".format(prompt))
+        acct = input(f"{prompt}: ")
         if int(acct) in acct_list:
             return acct
 
