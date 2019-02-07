@@ -77,26 +77,33 @@ def prompt_for_account(logger, prompt, cur):
 #     return cur_balance
 
 
-def get_savings_balance(logger, db):
-    logger.debug("Entering get_savings_balance()")
-    savings_balance = 0
+def get_savings_balance(cur, logger):
+    logger.debug('Entering get_savings_balance()')
+    row = cur.execute("SELECT sum(amount) from savings_account")
+    cur_balance = row.fetchone()[0]
+    return cur_balance
 
-    db = sqlite3.connect(db)
-    db.row_factory = sqlite3.Row
-    cur = db.cursor()
-    cur.execute("SELECT amount FROM savings_account")
-    rows = cur.fetchall()
-    logger.debug(rows)
-
-    for row in rows:
-        savings_balance += row["amount"]
-
-    # save, then close the cursor and db
-    db.commit()
-    cur.close()
-    db.close()
-
-    return savings_balance
+#
+# def get_savings_balance(logger, db):
+#     logger.debug("Entering get_savings_balance()")
+#     savings_balance = 0
+#
+#     db = sqlite3.connect(db)
+#     db.row_factory = sqlite3.Row
+#     cur = db.cursor()
+#     cur.execute("SELECT amount FROM savings_account")
+#     rows = cur.fetchall()
+#     logger.debug(rows)
+#
+#     for row in rows:
+#         savings_balance += row["amount"]
+#
+#     # save, then close the cursor and db
+#     db.commit()
+#     cur.close()
+#     db.close()
+#
+#     return savings_balance
 
 
 def get_balance_from_transaction_log(db, logger):

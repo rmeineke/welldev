@@ -1,9 +1,8 @@
-#! /usr/bin/python3
-
 import logging
 import sqlite3
 import sys
 import datetime
+from lib import utils
 
 
 def main():
@@ -29,24 +28,17 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    cur_balance = get_savings_balance(cur, logger)
+    cur_balance = utils.get_savings_balance(cur, logger)
     print()
-    print('---------------------------------------------')
+    print('------------------------------------------------------')
     print(f'Current savings balance: ${(cur_balance / 100):,.2f}')
-    print('---------------------------------------------')
+    print('------------------------------------------------------')
     print()
 
     # save, then close the cursor and db
     db.commit()
     cur.close()
     db.close()
-
-
-def get_savings_balance(cur, logger):
-    logger.debug('Entering get_savings_balance()')
-    row = cur.execute("SELECT sum(amount) from savings_account")
-    cur_balance = row.fetchone()[0]
-    return cur_balance
 
 
 if __name__ == '__main__':
