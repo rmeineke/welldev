@@ -32,8 +32,8 @@ def main():
     logger.debug("payment_recd")
     logger.debug("entering main")
 
-    db = sqlite3.connect(f"{db}")
-    cur = db.cursor()
+    database = sqlite3.connect(f"{db}")
+    cur = database.cursor()
 
     acct = utils.prompt_for_account(logger, "Please choose an account", cur)
     date = utils.prompt_for_current_date(logger, "Payment date")
@@ -77,10 +77,10 @@ def main():
     cur_balance = get_acct_balance(acct, cur)
     print(f"Updated balance:\t{cur_balance:.2f}\n")
 
-    # save, then close the cursor and db
-    db.commit()
+    # save, then close the cursor and database
+    database.commit()
     cur.close()
-    db.close()
+    database.close()
 
 
 if __name__ == "__main__":
