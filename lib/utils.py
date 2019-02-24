@@ -35,7 +35,7 @@ def prompt_for_current_date(logger, prompt):
     logger.debug("entering prompt_for_current_date")
     while 1:
         try:
-            reading_date = input("{}: ".format(prompt))
+            reading_date = input(f"{prompt}: ")
             date_obj = datetime.datetime.strptime(reading_date, "%m/%d/%Y")
             return datetime.datetime.strftime(date_obj, "%Y-%m-%d")
         except ValueError:
