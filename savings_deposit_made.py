@@ -27,9 +27,10 @@ def main():
     cur = db.cursor()
 
     # present the last savings assessment here ...
-    cur.execute('SELECT transaction_amount FROM transactions_log WHERE transaction_type = 6')
+    cur.execute('SELECT transaction_amount FROM transactions_log WHERE transaction_type = 6 ORDER BY transaction_date DESC LIMIT 1')
     last_assessment = cur.fetchone()[0]
     print(f'last_assessment amount: {last_assessment / 100:.2f}')
+
     # get date_paid
     deposit_date = utils.prompt_for_current_date(logger, "Date deposit made")
     # get amount
@@ -49,7 +50,7 @@ def main():
 
     # go to the master account
     # find the last billing amount
-    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%Savings Assessment%"')
+    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%Savings Assessment%" ORDER BY date DESC LIMIT 1')
     last_savings_assessment = cur.fetchone()[0]
     logger.debug(f'last_billing_amt: {last_savings_assessment}')
 

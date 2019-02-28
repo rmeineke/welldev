@@ -45,7 +45,8 @@ def main():
 
     # go to the master account
     # find the last billing amount
-    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%PGE Bill Share%"')
+    # 2019.02.19 ... had to tweak this as it was grabbing the wrong amount due to a sorting error
+    cur.execute(f'SELECT amount FROM master_account WHERE acct_id = {master_acct_id} and notes like "%PGE Bill Share%" ORDER BY date DESC LIMIT 1')
     last_billing_amt = cur.fetchone()[0]
     logger.debug(f'last_billing_amt: {last_billing_amt}')
 
