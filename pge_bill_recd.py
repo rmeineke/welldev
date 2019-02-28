@@ -78,7 +78,7 @@ def main():
 
     # a balance less than $10k should trigger an assessment
     # in the upcoming for loop
-    savings_balance = utils.get_savings_balance(logger, database)
+    savings_balance = utils.get_savings_balance(logger, cur)
     logger.debug(f'savings_balance: {savings_balance}')
 
     assessment_total = 0

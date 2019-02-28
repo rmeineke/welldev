@@ -28,7 +28,7 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    cur_balance = utils.get_savings_balance(cur, logger)
+    cur_balance = utils.get_savings_balance(logger, cur)
     print()
     print('------------------------------------------------------')
     print(f'Current savings balance: ${(cur_balance / 100):,.2f}')

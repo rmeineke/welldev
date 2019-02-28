@@ -77,7 +77,7 @@ def prompt_for_account(logger, prompt, cur):
 #     return cur_balance
 
 
-def get_savings_balance(cur, logger):
+def get_savings_balance(logger, cur):
     logger.debug('Entering get_savings_balance()')
     row = cur.execute("SELECT sum(amount) from savings_account")
     cur_balance = row.fetchone()[0]
