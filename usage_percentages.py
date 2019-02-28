@@ -75,14 +75,15 @@ def main():
     logger.debug(f"total usage: {total_usage:.2f}")
     total_usage = round(total_usage, 2)
     logger.debug(f"total usage, rounded: {total_usage:.2f}")
+    print(f'')
     percents_total = 0
     for a in acct_list:
         a.current_usage_percent = round(a.current_usage / total_usage * 100, 2)
-        print(f"{a.ln:20}...  {a.current_usage_percent}%")
+        print(f"{a.ln:20}...  {a.current_usage_percent:8.2f}%")
         logger.debug(f"{a.current_usage / total_usage * 100}")
         percents_total += a.current_usage_percent
 
-    print(f"{'percents_total:':19} ... {percents_total:.2f}%")
+    print(f"\n{'percents_total:':19} ... {percents_total:9.2f}%\n")
 
     # save, then close the cursor and db
     db.commit()
