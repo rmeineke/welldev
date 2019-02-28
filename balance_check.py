@@ -1,7 +1,6 @@
 import logging
 import sys
 import sqlite3
-import datetime
 
 
 def main():
@@ -27,15 +26,16 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
+    print(f'')
     get_account_balances(cur, logger)
     master_bal = get_master_account_balance(cur, logger)
-    print(f'master account balance: {master_bal / 100:.2f}')
+    print(f'\nmaster account balance: {master_bal / 100:10.2f}')
 
     transaction_log_balance = get_transaction_log_balance(cur, logger)
     if transaction_log_balance:
-        print(f'transaction log balance: {transaction_log_balance / 100:.2f}')
+        print(f'transaction log balance: {transaction_log_balance / 100:9.2f}')
     else:
-        print(f'transaction log balance: {0.00:.2f}')
+        print(f'transaction log balance: {0.00:9.2f}')
 
     # save, then close the cursor and db
     db.commit()
@@ -52,8 +52,7 @@ def get_account_balances(cur, logger):
     for r in rows:
         bal_row = cur.execute('SELECT SUM(amount) FROM master_account WHERE acct_id = {}'.format(r['acct_id']))
         bal = bal_row.fetchone()[0]
-        print('{} -- {:10} ..... {:>8,.2f}'.format(r['acct_id'], r['last_name'], bal / 100))
-
+        print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
 
 def get_master_account_balance(cur, logger):
     logger.debug('Entering get_master_account_balance()')
