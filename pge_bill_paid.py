@@ -53,7 +53,14 @@ def main():
     # credit the master account with the equivalent payment
     last_billing_amt = last_billing_amt * -1
     cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?,?,?,?)',
-                (master_acct_id, payment_date, last_billing_amt , "PGE Bill Paid"))
+                (master_acct_id, payment_date, last_billing_amt , "Payment on account (PGE Bill Paid.)"))
+
+    # insert into the transaction log
+    cur.execute(
+        "INSERT INTO transactions_log (acct_id, transaction_type, transaction_date, transaction_amount) "
+        "VALUES (?, ?, ?, ?)",
+        (master_acct_id, 3, payment_date, last_billing_amt),
+    )
 
     # save, then close the cursor and db
     db.commit()
@@ -63,13 +70,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-#
-# sqlite> select amount  from master_account where acct_id = 3;
-# 0
-# 3149
-# 1335
-# 0
-# sqlite> select amount  from master_account where acct_id = 3 and notes like '%PGE Bill Share%';
-# 3149
-# sqlite>

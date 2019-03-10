@@ -1,6 +1,7 @@
 import logging
 import sys
 import sqlite3
+from lib import utils
 
 
 def main():
@@ -20,53 +21,19 @@ def main():
 
     logger = logging.getLogger()
     logger.debug('Entering main')
-    # logger.debug(datetime.date.today().isoformat())
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    print(f'')
-    get_account_balances(cur, logger)
-    master_bal = get_master_account_balance(cur, logger)
-    print(f'\nmaster account balance: {master_bal / 100:10.2f}')
+    utils.print_account_balances(cur, logger)
+    utils.print_master_account_balance(cur, logger)
+    utils.print_transaction_log_balance(cur, logger)
+    utils.print_savings_account_balance(cur, logger)
 
-    transaction_log_balance = get_transaction_log_balance(cur, logger)
-    if transaction_log_balance:
-        print(f'transaction log balance: {transaction_log_balance / 100:9.2f}')
-    else:
-        print(f'transaction log balance: {0.00:9.2f}')
-
-    # save, then close the cursor and db
-    db.commit()
+    # close the cursor and db
     cur.close()
     db.close()
-
-
-def get_account_balances(cur, logger):
-    logger.debug('Entering get_account_balances')
-    # loop through and get acct ids
-    # then get each balance and return
-    cur.execute('SELECT acct_id, last_name FROM accounts')
-    rows = cur.fetchall()
-    for r in rows:
-        bal_row = cur.execute('SELECT SUM(amount) FROM master_account WHERE acct_id = {}'.format(r['acct_id']))
-        bal = bal_row.fetchone()[0]
-        print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
-
-def get_master_account_balance(cur, logger):
-    logger.debug('Entering get_master_account_balance()')
-    row = cur.execute("SELECT sum(amount) FROM master_account")
-    cur_balance = row.fetchone()[0]
-    return cur_balance
-
-
-def get_transaction_log_balance(cur, logger):
-    logger.debug('Entering get_transaction_log_balance()')
-    row = cur.execute("SELECT SUM(transaction_amount) FROM transactions_log WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6 OR transaction_type = 7")
-    logger.debug(f'row: {row}')
-    cur_balance = row.fetchone()[0]
-    return cur_balance
 
 
 if __name__ == '__main__':

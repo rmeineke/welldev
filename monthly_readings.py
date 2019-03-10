@@ -28,7 +28,13 @@ def main():
     cur = db.cursor()
 
     reading_date = utils.prompt_for_current_date(logger, "Reading date")
-    cur.execute("INSERT INTO reading_dates (reading_date) VALUES (?)", (reading_date,))
+    exec_str = f"""
+        INSERT INTO reading_dates (reading_date) 
+        VALUES (?), 
+        ({reading_date},)
+    """
+    # cur.execute("INSERT INTO reading_dates (reading_date) VALUES (?)", (reading_date,))
+    cur.execute(exec_str)
     last_inserted_row_id = cur.lastrowid
 
     logger.debug("attempting to backup the database file now")
@@ -44,7 +50,6 @@ def main():
             )
         )
         last_reading = cur.fetchone()
-        # print("""Last month's reading: {}""".format(last_reading['reading']))
         print(f"Last month's reading: {last_reading['reading']}")
 
         # grab current reading and then insert it into the DB
@@ -56,10 +61,16 @@ def main():
         print()
 
     # insert into the transaction log
-    cur.execute(
-        "INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)",
-        (3, reading_date, 0.00),
-    )
+    exec_str = f"""
+        INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) 
+        VALUES (?, ?, ?),
+        (9, reading_date, 0.00)
+    """
+    cur.execute(exec_str)
+    # cur.execute(
+    #     "INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)",
+    #     (9, reading_date, 0.00),
+    # )
 
     # save, then close the cursor and db
     db.commit()

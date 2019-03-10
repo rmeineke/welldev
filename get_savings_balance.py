@@ -35,8 +35,7 @@ def main():
     print('------------------------------------------------------')
     print()
 
-    # save, then close the cursor and db
-    db.commit()
+    # close the cursor and db
     cur.close()
     db.close()
 

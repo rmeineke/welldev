@@ -36,7 +36,9 @@ def prompt_for_current_date(logger, prompt):
     while 1:
         try:
             reading_date = input(f"{prompt}: ")
+            # ................................................ 01/24/2019
             date_obj = datetime.datetime.strptime(reading_date, "%m/%d/%Y")
+            # ......................................... 2019-01-24
             return datetime.datetime.strftime(date_obj, "%Y-%m-%d")
         except ValueError:
             print("Bad date ... try again.")
@@ -83,27 +85,19 @@ def get_savings_balance(logger, cur):
     cur_balance = row.fetchone()[0]
     return cur_balance
 
-#
-# def get_savings_balance(logger, db):
-#     logger.debug("Entering get_savings_balance()")
-#     savings_balance = 0
-#
-#     db = sqlite3.connect(db)
-#     db.row_factory = sqlite3.Row
-#     cur = db.cursor()
-#     cur.execute("SELECT amount FROM savings_account")
-#     rows = cur.fetchall()
-#     logger.debug(rows)
-#
-#     for row in rows:
-#         savings_balance += row["amount"]
-#
-#     # save, then close the cursor and db
-#     db.commit()
-#     cur.close()
-#     db.close()
-#
-#     return savings_balance
+def print_savings_account_balance(cur, logger):
+    logger.debug('Entering get_savings_balance()')
+    row = cur.execute("SELECT sum(amount) from savings_account")
+    print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
+
+
+
+def get_last_reading_date(logger, cur):
+    exec_str = """
+    SELECT reading_date FROM reading_dates ORDER BY reading_date DESC LIMIT 1
+    """
+    row = cur.execute(exec_str)
+    return row.fetchone()[0]
 
 
 def get_balance_from_transaction_log(db, logger):
@@ -119,3 +113,114 @@ def get_balance_from_transaction_log(db, logger):
     cur.close()
     db.close()
     return cur_balance
+
+
+def print_transaction_log_balance(cur, logger):
+    logger.debug('Entering get_transaction_log_balance()')
+
+    exec_str = f"""
+    SELECT SUM(transaction_amount) 
+    FROM transactions_log 
+    WHERE transaction_type = 4 
+    OR transaction_type = 5 
+    OR transaction_type = 6 
+    OR transaction_type = 7
+    """
+
+    row = cur.execute(exec_str)
+    logger.debug(f'row: {row}')
+    cur_balance = row.fetchone()[0]
+    print(f'transaction log balance: {cur_balance / 100:9.2f}')
+
+
+def print_master_account_balance(cur, logger):
+    logger.debug('Entering get_master_account_balance()')
+
+    exec_str = f"""
+    SELECT sum(amount) FROM master_account
+    """
+
+    row = cur.execute(exec_str)
+    cur_balance = row.fetchone()[0]
+    print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
+
+
+def print_account_balances(cur, logger):
+    logger.debug('Entering get_account_balances')
+    # loop through and get acct ids
+    # then get each balance and return
+
+    exec_str = f"""
+    SELECT acct_id, last_name 
+    FROM accounts
+    """
+
+    cur.execute(exec_str)
+    rows = cur.fetchall()
+    for r in rows:
+
+        exec_str = f"""
+        SELECT SUM(amount) 
+        FROM master_account 
+        WHERE acct_id = {r['acct_id']}
+        """
+
+        bal_row = cur.execute(exec_str)
+        bal = bal_row.fetchone()[0]
+        print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
+
+
+def fetch_last_two_reading(cur, acct_id, logger):
+    exec_str = f"""
+        SELECT reading
+        FROM readings
+        WHERE account_id = {acct_id}
+        ORDER BY reading_id
+        DESC
+        LIMIT 2
+    """
+    rows = cur.execute(exec_str)
+    return rows
+
+
+def get_last_two_reading_dates(cur, logger):
+    logger.debug(f"entering get_last_two_reading_dates")
+    exec_str = f"""
+        SELECT reading_date
+        FROM reading_dates
+        ORDER BY reading_date
+        DESC 
+        LIMIT 2
+    """
+    rows = cur.execute(exec_str)
+    dates = []
+    for row in rows:
+        dates.append(row['reading_date'])
+    logger.debug(f"get_last_two_reading_dates ... returning: {dates}")
+    return dates
+
+
+def get_prev_balance(cur, acct_id, date, logger):
+    exec_str = f"""
+        SELECT SUM(amount)
+        FROM master_account
+        WHERE acct_id = {acct_id}
+        AND date <= '{date}'
+    """
+    logger.debug(f"{exec_str}")
+    row = cur.execute(exec_str)
+    return row.fetchone()[0]
+
+
+def get_payments_total(cur, acct_id, date, logger):
+    exec_str = f"""
+        SELECT SUM(transaction_amount)
+        FROM transactions_log
+        WHERE acct_id = {acct_id}
+        AND transaction_date >= '{date}'
+    """
+    logger.debug(f"{exec_str}")
+    row = cur.execute(exec_str)
+    return row.fetchone()[0]
+
+# select sum(transaction_amount) from transactions_log where acct_id = 1 and transaction_type = 3 and transaction_date >= '2018-01-01';

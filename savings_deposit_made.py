@@ -57,7 +57,14 @@ def main():
     # credit the master account with the equivalent payment
     last_savings_assessment = last_savings_assessment * -1
     cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?,?,?,?)',
-                (master_acct_id, deposit_date, last_savings_assessment, "Savings Deposit"))
+                (master_acct_id, deposit_date, last_savings_assessment, "Payment on account (Savings Deposit.)"))
+
+    # insert into the transaction log
+    cur.execute(
+        "INSERT INTO transactions_log (acct_id, transaction_type, transaction_date, transaction_amount) "
+        "VALUES (?, ?, ?, ?)",
+        (master_acct_id, 3, deposit_date, last_savings_assessment),
+    )
 
     # prompt for notes ... 'Dep for Jan 2019' ... or similar
     notes = utils.prompt_for_notes(logger, 'Notes for this deposit')
@@ -75,12 +82,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-#
-# sqlite> select amount  from master_account where acct_id = 3;
-# 0
-# 3149
-# 1335
-# 0
-# sqlite> select amount  from master_account where acct_id = 3 and notes like '%PGE Bill Share%';
-# 3149
-# sqlite>
