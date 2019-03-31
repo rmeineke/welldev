@@ -2,12 +2,16 @@ import logging
 import sys
 import sqlite3
 from lib import utils
-
+import constants
 
 def get_acct_balance(acct, cur):
-    row = cur.execute(
-        f"SELECT sum(amount) from master_account WHERE acct_id = {acct}"
-    )
+    exec_str = f"""
+        SELECT SUM(amount) 
+        FROM activity 
+        WHERE acct = (?)
+    """
+    params = (acct, )
+    row = cur.execute(exec_str, params)
     bal = row.fetchone()[0]
     return bal / 100
 
@@ -44,9 +48,9 @@ def main():
     amt *= -1
 
     # cobble together the account note
-    notes = "Payment on account. "
+    notes = "Payment on account ("
     notes += utils.prompt_for_notes(logger, "Check number")
-    notes += "."
+    notes += ")"
 
     logger.debug(date)
     logger.debug(amt)
@@ -60,17 +64,11 @@ def main():
     # backup the file prior to adding any data
     utils.backup_file(logger, db)
 
+    const = constants.Constants()
     # insert the account
     cur.execute(
-        "INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?, ?, ?, ?)",
-        (acct, date, amt, notes),
-    )
-
-    # insert into the transaction log
-    cur.execute(
-        "INSERT INTO transactions_log (acct_id, transaction_type, transaction_date, transaction_amount) "
-        "VALUES (?, ?, ?, ?)",
-        (acct, 3, date, amt),
+        "INSERT INTO activity (date, acct, type, amount, note) VALUES (?, ?, ?, ?, ?)",
+        (date, acct, const.payment, amt, notes),
     )
 
     # fetch updated balance and display

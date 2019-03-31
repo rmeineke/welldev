@@ -30,7 +30,7 @@ def main():
     cur = db.cursor()
 
     logger.debug('calling create_account_table')
-    create_accounts_table(cur, logger)
+    create_account_table(cur, logger)
 
     for acct in data["accounts"]:
         logger.debug('in the acct loop')
@@ -43,11 +43,11 @@ def main():
     db.close()
 
 
-def create_accounts_table(c, logger):
+def create_account_table(c, logger):
     logger.debug('inside create_account_table')
-    c.execute('DROP TABLE IF EXISTS accounts')
+    c.execute('DROP TABLE IF EXISTS account')
     c.execute('CREATE TABLE IF NOT EXISTS \
-                accounts(acct_id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                account(acct_id INTEGER PRIMARY KEY AUTOINCREMENT, \
                         first_name TEXT, \
                         last_name TEXT, \
                         address TEXT, \
@@ -56,7 +56,7 @@ def create_accounts_table(c, logger):
 
 
 def account_data_entry(c, fn, ln, a, reads, master):
-    c.execute('INSERT INTO accounts (first_name, last_name, address, reads_in, master) VALUES (?, ?, ?, ?, ?)',
+    c.execute('INSERT INTO account (first_name, last_name, address, reads_in, master) VALUES (?, ?, ?, ?, ?)',
               (fn, ln, str(a), reads, master))
 
 

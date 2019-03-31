@@ -3,12 +3,11 @@ import sys
 import sqlite3
 import account
 from lib import utils
+import constants
 
 
 def main():
     database = 'well.db'
-
-    ASSESSMENT_PER_GALLON = 0.0025
 
     # set up for logging
     LEVELS = {'debug': logging.DEBUG,
@@ -37,12 +36,13 @@ def main():
     pge_bill = float(utils.prompt_for_amount(logger, 'PGE bill amount'))
     logger.debug(f'pge_bill: {int(pge_bill)}')
 
-    # insert into the transaction log
-    cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?)',
-                (5, bill_date, pge_bill))
+    const = constants.Constants()
+    exec_str = f"INSERT INTO activity (date, type, amount, note) VALUES (?, ?, ?, ?)"
+    params = (bill_date, const.pge_bill_received, pge_bill, "PGE bill received")
+    cur.execute(exec_str, params)
 
     # instantiate an obj for each of the accounts
-    cur.execute("SELECT * FROM accounts")
+    cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
 
     acct_list = []
@@ -54,7 +54,16 @@ def main():
         acct_list.append(acct_obj)
 
         # fetch the last two reading rows from the db
-        rows = cur.execute('SELECT reading FROM readings WHERE account_id = {} ORDER BY reading_id DESC LIMIT 2'.format(r['acct_id']))
+        query = f"""
+            SELECT reading 
+            FROM reading
+            WHERE account_id = (?)
+            ORDER BY reading_id 
+            DESC LIMIT 2
+        """
+        params = (r['acct_id'], )
+        rows = cur.execute(query, params)
+
         # near as I can tell this returns a row for each line of data found
         # the row is a list of selected items .... so 'reading' is the
         # zeroeth item ...
@@ -82,51 +91,63 @@ def main():
     logger.debug(f'savings_balance: {savings_balance}')
 
     assessment_total = 0
-    for a in acct_list:
-        logger.debug(f'\n\n{a.addr}')
-        logger.debug(f'current_usage_percent: {a.current_usage_percent}')
-        logger.debug(f'{(a.current_usage / total_usage) * 100}')
-        logger.debug(f'{total_usage}')
+    for acct in acct_list:
+        logger.debug(f'\n\n{acct.addr}')
 
-        a.current_usage_percent = round((a.current_usage / total_usage) * 100, 2)
-        logger.debug(f'current_usage_percent: {a.current_usage_percent:.2f}')
-        logger.debug(f'pge_bill: {pge_bill}')
-        logger.debug(f'a.current_usage_percent: {a.current_usage_percent}')
+        logger.debug(f'current_usage_percent (b4 calculation): {acct.current_usage_percent}')
+        logger.debug(f'current_usage_percent: {(acct.current_usage / total_usage) * 100}')
+        logger.debug(f'total_usage: {total_usage}')
 
-        # built-in round works properly here
-        # print(f' >>>>>>>>>>>>>>>>> {round((pge_bill * a.current_usage_percent / 100),0)}')
-        # print(f' >>>>>>>>>>>>>>>>> {int(pge_bill * a.current_usage_percent / 100)}')
+        acct.current_usage_percent = round((acct.current_usage / total_usage) * 100, 2)
+        logger.debug(f'current_usage_percent (rounded): {acct.current_usage_percent:.2f}')
+        logger.debug(f'pge_bill: {int(pge_bill)}')
+        logger.debug(f'a.current_usage_percent: {acct.current_usage_percent}')
 
-        a.pge_bill_share = round((pge_bill * a.current_usage_percent / 100), 0)
-        logger.debug(f'pge_bill_share: {a.pge_bill_share}')
+        acct.pge_bill_share = round((pge_bill * acct.current_usage_percent / 100), 0)
+        logger.debug(f'pge_bill_share: {int(acct.pge_bill_share)}')
 
-        # write this share to the db - master_account table
-        cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?, ?, ?, ?)',
-                    (a.acct_id, bill_date, a.pge_bill_share, 'PGE Bill Share'))
+        exec_str = f"""
+            INSERT INTO activity (date, acct, type, amount, note) 
+            VALUES (?, ?, ?, ?, ?)
+        """
+        params = (bill_date, acct.acct_id, const.pge_bill_share, acct.pge_bill_share, "PGE bill share")
+        cur.execute(exec_str, params)
 
         # this should be moved outside ... no sense going through all
         # this if no assessment needed ...
         # move it outside and process as separate
         if savings_balance < 1000000:
             logger.debug(f'Assessment is due.')
-            a.savings_assessment = int(round(a.current_usage * ASSESSMENT_PER_GALLON * 100, 0))
-            logger.debug(f'Assessed: {a.savings_assessment}')
-            # write this to the db
-            cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) VALUES (?, ?, ?, ?)',
-                        (a.acct_id, bill_date, a.savings_assessment, 'Savings Assessment'))
+            acct.savings_assessment = int(round(acct.current_usage * const.assessment_per_gallon * 100, 0))
+            logger.debug(f'Assessed: {acct.savings_assessment}')
 
-            assessment_total += a.savings_assessment
-            logger.debug(f'Bill total: {round(a.savings_assessment + a.pge_bill_share,2)}')
+            # write this to the db
+            exec_str = f"""
+                INSERT INTO activity (date, acct, type, amount, note) 
+                VALUES (?, ?, ?, ?, ?)
+            """
+            params = (bill_date, acct.acct_id, const.savings_assessment, acct.savings_assessment, 'Savings assessment')
+            cur.execute(exec_str, params)
+
+            assessment_total += acct.savings_assessment
+            logger.debug(f'Bill total: {int(round(acct.savings_assessment + acct.pge_bill_share, 2))}')
         else:
             logger.debug(f'No assessment needed.')
 
+    # this needs to be put into the activity log
+
     assessment_total = int(round(assessment_total, 2))
+
+    # write this to the db
+    exec_str = f"""
+                    INSERT INTO activity (date, type, amount, note) 
+                    VALUES (?, ?, ?, ?)
+                """
+    params = (bill_date, const.savings_assessment_total, assessment_total, 'Savings assessment total')
+    cur.execute(exec_str, params)
     print(f'============================================================================')
     print(f'==> assessment_total: {assessment_total / 100:.2f}')
     print(f'============================================================================')
-    cur.execute('INSERT INTO transactions_log (transaction_type, transaction_date, transaction_amount) '
-                'VALUES (?, ?, ?)',
-                (6, bill_date, assessment_total))
 
     # save, then close the cursor and db
     db.commit()

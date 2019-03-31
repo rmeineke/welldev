@@ -19,38 +19,42 @@ def main():
         logging.basicConfig(level=level)
 
     logger = logging.getLogger()
-    logger.debug('make_master_account_table')
+    logger.debug('make_activity_table')
     logger.debug('Entering main')
 
     db = sqlite3.connect('{}'.format(db))
     cur = db.cursor()
 
-    logger.debug('calling create_master_account_table')
-    create_master_account_table(cur, logger)
-    cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) \
+    logger.debug('calling create_activity_table')
+    create_activity_table(cur, logger)
+    cur.execute('INSERT INTO activity (acct, date, amount, note) \
                     VALUES (1, "2019-01-01", 0, "Opening Balance")')
-    cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) \
+    cur.execute('INSERT INTO activity (acct, date, amount, note) \
                     VALUES (2, "2019-01-01", -4680, "Opening Balance")')
-    cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) \
+    cur.execute('INSERT INTO activity (acct, date, amount, note) \
                     VALUES (3, "2019-01-01", 0, "Opening Balance")')
-    cur.execute('INSERT INTO master_account (acct_id, date, amount, notes) \
+    cur.execute('INSERT INTO activity (acct, date, amount, note) \
                     VALUES (4, "2019-01-01", 0, "Opening Balance")')
 
+    cur.execute('INSERT INTO activity (date, acct, type, amount, note) '
+                'VALUES("2019-01-24", 2, 1, -5000, "Missing 8/2008 reading")');
     # save, then close the cursor and db
     db.commit()
     cur.close()
     db.close()
 
 
-def create_master_account_table(c, logger):
-    logger.debug('inside create_master_account_table')
-    c.execute('DROP TABLE IF EXISTS master_account')
+def create_activity_table(c, logger):
+    logger.debug('inside create_activity_table')
+    c.execute('DROP TABLE IF EXISTS activity')
     c.execute('CREATE TABLE IF NOT EXISTS \
-                master_account(transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                        acct_id INTEGER, \
+                activity(id INTEGER PRIMARY KEY AUTOINCREMENT, \
                         date TEXT, \
+                        acct INTEGER, \
+                        type INTEGER, \
                         amount INTEGER, \
-                        notes TEXT)')
+                        note TEXT)')
+
 
 if __name__ == '__main__':
     main()

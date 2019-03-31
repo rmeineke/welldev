@@ -24,11 +24,16 @@ def main():
     db = sqlite3.connect('{}'.format(db))
     cur = db.cursor()
 
-    logger.debug('calling create_account_table')
+    logger.debug('calling create_savings_account_table')
     create_savings_account_table(cur, logger)
-    cur.execute('INSERT INTO savings_account (date, amount, notes) \
+    cur.execute('INSERT INTO savings_account (date, amount, note) \
                 VALUES ("2018-12-31", 912613, "Opening Balance")')
-
+    cur.execute('INSERT INTO savings_account (date, amount, note) \
+                    VALUES ("2019-01-30", 4240, "Jan 2019 assessment")')
+    cur.execute('INSERT INTO savings_account (date, amount, note) \
+                    VALUES ("2019-02-28", 5632, "Feb 2019 assessment")')
+    cur.execute('INSERT INTO savings_account (date, amount, note) \
+                    VALUES ("2019-03-19", 290, "Dividend to account")')
     db.commit()
     cur.close()
     db.close()
@@ -41,11 +46,11 @@ def create_savings_account_table(c, logger):
                 savings_account(transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, \
                         date TEXT, \
                         amount INTEGER, \
-                        notes TEXT)')
+                        note TEXT)')
 
 
 def account_data_entry(c, date, amount, notes):
-    c.execute('INSERT INTO savings_account (date, amount, notes) VALUES (?, ?, ?)',
+    c.execute('INSERT INTO savings_account (date, amount, note) VALUES (?, ?, ?)',
               (date, amount, notes))
 
 

@@ -1,11 +1,10 @@
 import logging
 import sys
 import sqlite3
-from lib import utils
 
 
 def main():
-    database = 'well.db'
+    db = '../well.db'
 
     # set up for logging
     LEVELS = {'debug': logging.DEBUG,
@@ -22,18 +21,25 @@ def main():
     logger = logging.getLogger()
     logger.debug('Entering main')
 
-    db = sqlite3.connect(database)
-    db.row_factory = sqlite3.Row
+    db = sqlite3.connect('{}'.format(db))
     cur = db.cursor()
 
-    utils.print_account_balances(logger, cur)
-    # utils.print_master_account_balance(cur, logger)
-    # utils.print_transaction_log_balance(cur, logger)
-    utils.print_savings_account_balance(logger, cur)
+    logger.debug('calling create_pge_account_table')
+    create_pge_account_table(cur, logger)
 
-    # close the cursor and db
+    db.commit()
     cur.close()
     db.close()
+
+
+def create_pge_account_table(c, logger):
+    logger.debug('inside create_pge_account_table')
+    c.execute('DROP TABLE IF EXISTS pge_account')
+    c.execute('CREATE TABLE IF NOT EXISTS \
+                pge_account(transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                        date TEXT, \
+                        amount INTEGER, \
+                        note TEXT)')
 
 
 if __name__ == '__main__':

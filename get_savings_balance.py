@@ -1,8 +1,7 @@
 import logging
 import sqlite3
 import sys
-import datetime
-from lib import utils
+import constants
 
 
 def main():
@@ -22,18 +21,26 @@ def main():
 
     logger = logging.getLogger()
     logger.debug('Entering main')
-    logger.debug(datetime.date.today().isoformat())
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    cur_balance = utils.get_savings_balance(logger, cur)
-    print()
-    print('------------------------------------------------------')
-    print(f'Current savings balance: ${(cur_balance / 100):,.2f}')
-    print('------------------------------------------------------')
-    print()
+    exec_str = f"""
+        SELECT SUM(amount) 
+        FROM activity
+        WHERE type = (?)
+        OR type = (?)
+        OR type = (?)
+    """
+    const = constants.Constants()
+    params = (const.savings_deposit, const.savings_disbursement, const.savings_deposit)
+    cur.execute(exec_str, params)
+    current_savings_balance = cur.fetchone()[0]
+    logger.debug(f"current_savings_balance: {current_savings_balance}")
+    print(f"===============================================")
+    print(f" current savings balance: $ {current_savings_balance/100:,.2f}")
+    print(f"===============================================")
 
     # close the cursor and db
     cur.close()

@@ -2,6 +2,7 @@ import datetime
 import os
 import sqlite3
 from shutil import copyfile
+import constants
 
 
 def backup_file(logger, fn):
@@ -23,7 +24,11 @@ def prompt_for_amount(logger, prompt):
         try:
             amt = input(f"{prompt}: $")
             logger.debug(f"get_amount() input is: {amt}")
-            amt = int(float(amt) * 100)
+            logger.debug(f"amt: {amt}")
+            logger.debug(f"float(amt): {float(amt)}")
+            logger.debug(f"float(amt) * 100: {float(amt) * 100}")
+            logger.debug(f"round float(amt) * 100: {round(float(amt) * 100, 0)}")
+            amt = int(round(float(amt) * 100, 0))
             logger.debug(f"get_amount() is going to return: {amt}")
             return amt
         except ValueError as e:
@@ -58,7 +63,7 @@ def prompt_for_notes(logger, prompt):
 
 def prompt_for_account(logger, prompt, cur):
     # get the account list
-    cur.execute("SELECT * FROM accounts")
+    cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
     acct_list = []
     for r in rows:
@@ -81,15 +86,33 @@ def prompt_for_account(logger, prompt, cur):
 
 def get_savings_balance(logger, cur):
     logger.debug('Entering get_savings_balance()')
-    row = cur.execute("SELECT sum(amount) from savings_account")
+    exec_str = f"""
+        SELECT SUM(amount)
+        FROM activity 
+        WHERE type = (?)
+        OR type = (?)
+        OR type = (?)
+    """
+    const = constants.Constants()
+    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    row = cur.execute(exec_str, params)
     cur_balance = row.fetchone()[0]
     return cur_balance
 
-def print_savings_account_balance(cur, logger):
-    logger.debug('Entering get_savings_balance()')
-    row = cur.execute("SELECT sum(amount) from savings_account")
-    print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
 
+def print_savings_account_balance(logger, cur):
+    logger.debug('Entering print_savings_account_balance()')
+    exec_str = f"""
+            SELECT SUM(amount)
+            FROM activity 
+            WHERE type = (?)
+            OR type = (?)
+            OR type = (?)
+        """
+    const = constants.Constants()
+    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    row = cur.execute(exec_str, params)
+    print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
 
 
 def get_last_reading_date(logger, cur):
@@ -145,27 +168,27 @@ def print_master_account_balance(cur, logger):
     print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
 
 
-def print_account_balances(cur, logger):
+def print_account_balances(logger, cur):
     logger.debug('Entering get_account_balances')
     # loop through and get acct ids
     # then get each balance and return
 
     exec_str = f"""
-    SELECT acct_id, last_name 
-    FROM accounts
+        SELECT acct_id, last_name 
+        FROM account
     """
-
+    logger.debug(f"{exec_str}")
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
 
         exec_str = f"""
-        SELECT SUM(amount) 
-        FROM master_account 
-        WHERE acct_id = {r['acct_id']}
+            SELECT SUM(amount) 
+            FROM activity
+            WHERE acct = (?)
         """
-
-        bal_row = cur.execute(exec_str)
+        params = (r['acct_id'], )
+        bal_row = cur.execute(exec_str, params)
         bal = bal_row.fetchone()[0]
         print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
 
@@ -201,6 +224,8 @@ def get_last_two_reading_dates(cur, logger):
 
 
 def get_prev_balance(cur, acct_id, date, logger):
+    """this needs altering to use the date of the last
+    pge bill recd"""
     exec_str = f"""
         SELECT SUM(amount)
         FROM master_account
@@ -210,6 +235,22 @@ def get_prev_balance(cur, acct_id, date, logger):
     logger.debug(f"{exec_str}")
     row = cur.execute(exec_str)
     return row.fetchone()[0]
+#
+# 12||4|2019-02-27|-2800
+# 13|3|3|2019-02-27|-829
+# 14||7|2019-02-28|-5632
+# 15|3|3|2019-02-28|-1666
+# sqlite> select sum(amount) from master__account where acct_id = 1;
+# Error: no such table: master__account
+# sqlite> select sum(amount) from master_account where acct_id = 1;
+# 1746
+# sqlite> select sum(amount) from master_account where acct_id = 4;
+# 4115
+# sqlite> select sum(amount) from master_account where acct_id = 4 and date <= '2019-01-27';
+# 0
+# sqlite> select sum(amount) from master_account where acct_id = 4 and date <= '2019-01-28';
+# 1847
+# sqlite>
 
 
 def get_payments_total(cur, acct_id, date, logger):
