@@ -27,6 +27,8 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
+
+    # check current balance here
     const = constants.Constants()
     exec_str = f"""
         SELECT SUM(amount)
@@ -45,57 +47,21 @@ def main():
     print(f"===============================================")
 
     # get date_paid
-    deposit_date = utils.prompt_for_current_date(logger, "Date deposit made")
+    dividend_date = utils.prompt_for_current_date(logger, "Date of dividend")
     # get amount
-    deposit_amount = utils.prompt_for_amount(logger, "Amount of deposit")
+    dividend_amount = utils.prompt_for_amount(logger, "Amount of dividend")
     # prompt for notes ... 'Dep for Jan 2019' ... or similar
-    note = utils.prompt_for_notes(logger, 'Notes for this deposit')
+    note = f"Savings dividend"
 
+    # enter into the activity log
     exec_str = f"""
-        INSERT INTO activity (date, type, amount, note) VALUES (?, ?, ?, ?)
+        INSERT INTO activity (date, type, amount, note) 
+        VALUES (?, ?, ?, ?)
     """
-    params = (deposit_date, const.savings_deposit, deposit_amount, note)
+    params = (dividend_date, const.savings_dividend, dividend_amount, note)
     cur.execute(exec_str, params)
 
-    # get master acct id
-    exec_str = f"""
-        SELECT acct_id 
-        FROM account 
-        WHERE master = "yes"
-    """
-    cur.execute(exec_str)
-    # fetchone ROW .... zeroeth item is the account number
-    master_acct_id = cur.fetchone()[0]
-    logger.debug(f'master_acct_id: {master_acct_id}')
-
-    # get last assessment for the master acct
-    # select amount from activity where acct = 3 and type = 9;
-    exec_str = f"""
-        SELECT amount
-        FROM activity
-        WHERE acct = (?)
-        AND type = (?)
-        ORDER BY date
-        DESC
-        LIMIT 1
-    """
-    params = (master_acct_id, const.savings_assessment)
-    cur.execute(exec_str, params)
-
-    last_assessment_for_master = cur.fetchone()[0]
-    logger.debug(f"last_assessment_for_master: {last_assessment_for_master}")
-    # reverse the amount and write it back
-    last_assessment_for_master = last_assessment_for_master * -1
-    logger.debug(f"last_assessment_for_master: {last_assessment_for_master}")
-
-    exec_str = f"""
-        INSERT INTO activity (date, acct, type, amount, note) 
-        VALUES (?, ?, ?, ?, ?)
-    """
-    params = (deposit_date, master_acct_id, const.payment,
-              last_assessment_for_master, "Payment on account (savings deposit)")
-    cur.execute(exec_str, params)
-
+    # check the balance again
     exec_str = f"""
             SELECT SUM(amount)
             FROM activity 
