@@ -193,6 +193,8 @@ def print_account_balances(logger, cur):
         params = (r['acct_id'], )
         bal_row = cur.execute(exec_str, params)
         bal = bal_row.fetchone()[0]
+        if bal is None:
+            bal = 0
         print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
 
 
