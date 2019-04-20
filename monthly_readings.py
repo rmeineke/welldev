@@ -46,6 +46,10 @@ def main():
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
+        # if r['active'] == 'no':
+        #     logger.debug(f"Account {r['acct_id']} currently INACTIVE")
+        #     continue
+
         # fetch last month's reading as a sanity check
         exec_str = f"""
             SELECT reading 
@@ -61,6 +65,11 @@ def main():
 
         # grab current reading and then insert it into the DB
         reading = input(f"{r['acct_id']} - {r['address']}: ")
+
+        # this should allow empty input .... in case of inactive account
+        if not reading:
+            continue
+
         exec_str = f"""
             INSERT INTO reading (reading_id, account_id, reading)
             VALUES (?, ?, ?)

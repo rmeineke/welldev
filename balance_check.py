@@ -27,8 +27,6 @@ def main():
     cur = db.cursor()
 
     utils.print_account_balances(logger, cur)
-    # utils.print_master_account_balance(cur, logger)
-    # utils.print_transaction_log_balance(cur, logger)
     utils.print_savings_account_balance(logger, cur)
 
     # close the cursor and db

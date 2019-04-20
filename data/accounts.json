@@ -5,7 +5,8 @@
         "first_name" : "Gene and Toniann",
         "last_name" : "Schultz",
         "reads_in" : "gallons",
-        "master" : "no"
+        "master" : "no",
+        "active" : "yes"
     },
 
     {
@@ -14,7 +15,8 @@
         "first_name" : "Terry and Maureen",
         "last_name" : "Cain",
         "reads_in" : "cubic feet",
-        "master" : "no"
+        "master" : "no",
+        "active" : "yes"
     },
 
     {
@@ -23,7 +25,8 @@
         "first_name" : "Robert and Stephanie",
         "last_name" : "Meineke",
         "reads_in" : "cubic feet",
-        "master" : "yes"
+        "master" : "yes",
+        "active" : "yes"
     },
 
     {
@@ -32,6 +35,17 @@
         "first_name" : "Lazaro and Irma",
         "last_name" : "Olivares",
         "reads_in" : "cubic feet",
-        "master" : "no"
+        "master" : "no",
+        "active" : "yes"
+    },
+
+    {
+        "address" : "706 Carpenteria Rd",
+        "file_alias" : "706",
+        "first_name" : "Our New",
+        "last_name" : "Neighbor",
+        "reads_in" : "cubic feet",
+        "master" : "no",
+        "active" : "no"
     }
 ]}

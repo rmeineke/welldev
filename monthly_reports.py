@@ -28,14 +28,11 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    last_two_reading_dates = utils.get_last_two_reading_dates(cur, logger)
-    logger.debug(f"{last_two_reading_dates}")
-    prev_month_reading_date = last_two_reading_dates[1]
-    curr_month_reading_date = last_two_reading_dates[0]
-    logger.debug(f"{prev_month_reading_date} ... {curr_month_reading_date}")
+    last_pge_bill_recd_date = utils.get_last_pge_bill_recd_date(cur, logger)
+    logger.debug(f"last_pge_bill_recd_date: {last_pge_bill_recd_date}")
 
     acct_list = []
-    cur.execute("SELECT * FROM accounts")
+    cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
     ttl_monthly_usage = 0
     for r in rows:
@@ -45,23 +42,33 @@ def main():
         acct_list.append(acct_obj)
 
         # get and set the previous balance
-        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, prev_month_reading_date, logger)
+        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, last_pge_bill_recd_date, logger)
+        if prev_balance is None:
+            prev_balance = 0
         acct_obj.prev_balance = prev_balance
         logger.debug(f"prev_balance: {prev_balance}")
 
-        # check for any payments made
-        payments_ttl = utils.get_payments_total(cur, acct_obj.acct_id, prev_month_reading_date, logger)
-        if payments_ttl is None:
-            payments_ttl = 0.0
-        acct_obj.payments = payments_ttl
-        logger.debug(f"payments_ttl: {payments_ttl}")
-
-        # check for any other adjustments
-
         # new charges
+        new_charges = utils.get_new_charges(cur, acct_obj.acct_id, last_pge_bill_recd_date, logger)
+        if new_charges is None:
+            new_charges = 0
+        logger.debug(f"new_charges: {new_charges}")
+
+        # adjustments?
+        adjustments = utils.get_adjustments(cur, acct_obj.acct_id, last_pge_bill_recd_date, logger)
+        if adjustments is None:
+            adjustments = 0
+        logger.debug(f"adjustments: {adjustments}")
+
+        # check for any payments made
+        payments = utils.get_payments(cur, acct_obj.acct_id, last_pge_bill_recd_date, logger)
+        if payments is None:
+            payments = 0
+        logger.debug(f"payments: {payments}")
 
         # show account balance
-
+        balance = prev_balance + new_charges + adjustments + payments
+        logger.debug(f"balance: {balance}")
 
     # save, then close the cursor and db
     db.commit()

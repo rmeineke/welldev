@@ -174,13 +174,16 @@ def print_account_balances(logger, cur):
     # then get each balance and return
 
     exec_str = f"""
-        SELECT acct_id, last_name 
+        SELECT acct_id, last_name, active 
         FROM account
     """
     logger.debug(f"{exec_str}")
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
+        if r['active'] == 'no':
+            logger.debug(f"account {r['acct_id']} is inactive")
+            continue
 
         exec_str = f"""
             SELECT SUM(amount) 
@@ -196,7 +199,7 @@ def print_account_balances(logger, cur):
 def fetch_last_two_reading(cur, acct_id, logger):
     exec_str = f"""
         SELECT reading
-        FROM readings
+        FROM reading
         WHERE account_id = {acct_id}
         ORDER BY reading_id
         DESC
@@ -205,6 +208,22 @@ def fetch_last_two_reading(cur, acct_id, logger):
     rows = cur.execute(exec_str)
     return rows
 
+
+def get_last_pge_bill_recd_date(cur, logger):
+    logger.debug(f"entering get_last_pge_bill_recd_date")
+    const = constants.Constants()
+
+    exec_str = f"""
+        SELECT date
+        FROM activity
+        WHERE type = (?)
+        ORDER BY date
+        DESC
+    """
+    params = (const.pge_bill_received, )
+    cur.execute(exec_str, params)
+    row = cur.fetchone()
+    return row['date']
 
 def get_last_two_reading_dates(cur, logger):
     logger.debug(f"entering get_last_two_reading_dates")
@@ -228,12 +247,13 @@ def get_prev_balance(cur, acct_id, date, logger):
     pge bill recd"""
     exec_str = f"""
         SELECT SUM(amount)
-        FROM master_account
-        WHERE acct_id = {acct_id}
-        AND date <= '{date}'
+        FROM activity
+        WHERE acct = ?
+        AND date < ?
     """
-    logger.debug(f"{exec_str}")
-    row = cur.execute(exec_str)
+    params = (acct_id, date)
+    # logger.debug(f"{exec_str}")
+    row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 #
 # 12||4|2019-02-27|-2800
@@ -253,15 +273,48 @@ def get_prev_balance(cur, acct_id, date, logger):
 # sqlite>
 
 
-def get_payments_total(cur, acct_id, date, logger):
+def get_new_charges(cur, acct_id, date, logger):
+    const = constants.Constants()
+
     exec_str = f"""
-        SELECT SUM(transaction_amount)
-        FROM transactions_log
-        WHERE acct_id = {acct_id}
-        AND transaction_date >= '{date}'
+        SELECT SUM(amount)
+        FROM activity
+        WHERE acct = ?
+        AND type IN (?, ?)
+        AND date >= ?
     """
-    logger.debug(f"{exec_str}")
-    row = cur.execute(exec_str)
+    params = (acct_id, const.pge_bill_share, const.savings_assessment, date)
+    row = cur.execute(exec_str, params)
+    return row.fetchone()[0]
+
+
+def get_adjustments(cur, acct_id, date, logger):
+    const = constants.Constants()
+    exec_str = f"""
+            SELECT SUM(amount)
+            FROM activity
+            WHERE acct = ?
+            AND type = ?
+            AND date >= ?
+        """
+    params = (acct_id, const.account_adjustment, date)
+    row = cur.execute(exec_str, params)
+    return row.fetchone()[0]
+
+
+def get_payments(cur, acct_id, date, logger):
+    const = constants.Constants()
+
+    exec_str = f"""
+        SELECT SUM(amount)
+        FROM activity
+        WHERE acct = ?
+        AND type = ?
+        AND date >= ?
+    """
+    params = (acct_id, const.payment, date)
+    # logger.debug(f"{exec_str}")
+    row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 
 # select sum(transaction_amount) from transactions_log where acct_id = 1 and transaction_type = 3 and transaction_date >= '2018-01-01';

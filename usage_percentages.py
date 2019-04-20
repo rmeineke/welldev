@@ -28,12 +28,15 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    cur.execute("SELECT * FROM accounts")
+    cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
 
     acct_list = []
     total_usage = 0.0
     for r in rows:
+        if r["active"] == "no":
+            continue
+
         acct_obj = account.Account(
             r["acct_id"],
             r["first_name"],

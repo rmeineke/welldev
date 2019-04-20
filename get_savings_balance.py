@@ -34,7 +34,7 @@ def main():
         OR type = (?)
     """
     const = constants.Constants()
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_deposit)
+    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
     logger.debug(f"current_savings_balance: {current_savings_balance}")
