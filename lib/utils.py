@@ -2,7 +2,7 @@ import datetime
 import os
 import sqlite3
 from shutil import copyfile
-import constants
+from lib import constants
 
 
 def backup_file(logger, fn):
@@ -142,12 +142,12 @@ def print_transaction_log_balance(cur, logger):
     logger.debug('Entering get_transaction_log_balance()')
 
     exec_str = f"""
-    SELECT SUM(transaction_amount) 
-    FROM transactions_log 
-    WHERE transaction_type = 4 
-    OR transaction_type = 5 
-    OR transaction_type = 6 
-    OR transaction_type = 7
+        SELECT SUM(transaction_amount) 
+        FROM transactions_log 
+        WHERE transaction_type = 4 
+        OR transaction_type = 5 
+        OR transaction_type = 6 
+        OR transaction_type = 7
     """
 
     row = cur.execute(exec_str)
