@@ -2,7 +2,7 @@ import logging
 import sys
 import sqlite3
 from lib import utils
-import constants
+from lib import constants
 
 
 def main():

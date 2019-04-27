@@ -3,7 +3,7 @@ import sys
 import sqlite3
 import account
 from lib import utils
-import constants
+from lib import constants
 
 
 def main():
@@ -50,6 +50,9 @@ def main():
 
     # each row('r') ... should represent an individual account
     for r in rows:
+        if r['active'] == 'no':
+            logger.debug(f"Account {r['acct_id']} currently INACTIVE")
+            continue
         acct_obj = account.Account(r['acct_id'], r['first_name'], r['last_name'], r['address'], r['reads_in'], ['master'])
         acct_list.append(acct_obj)
 

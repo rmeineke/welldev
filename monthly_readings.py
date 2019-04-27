@@ -46,9 +46,9 @@ def main():
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
-        # if r['active'] == 'no':
-        #     logger.debug(f"Account {r['acct_id']} currently INACTIVE")
-        #     continue
+        if r['active'] == 'no':
+            logger.debug(f"Account {r['acct_id']} currently INACTIVE")
+            continue
 
         # fetch last month's reading as a sanity check
         exec_str = f"""

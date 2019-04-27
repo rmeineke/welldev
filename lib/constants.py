@@ -1,16 +1,17 @@
 class Constants:
+
     def __init__(self):
         self._account_adjustment = 1
-        self._administrative_fee_paid = 2
-        self._administrative_fee_received = 3
-        self._monthly_reading = 4 # not currently used anywhere
-        self._payment = 5
-        self._pge_bill_paid = 6
+        self._administrative_fee_received= 2
+        self._administrative_fee_paid = 3
+        self._misc_rebate_received = 4
+        self._misc_rebate_disbursed = 5
+        self._payment_received = 6
         self._pge_bill_received = 7
-        self._pge_bill_share = 8
-        self._savings_assessment = 9
-        self._savings_assessment_total = 10
-        self._savings_deposit = 11
+        self._pge_bill_paid = 8
+        self._pge_bill_share = 9
+        self._savings_assessment = 10
+        self._savings_deposit_made = 11
         self._savings_disbursement = 12
         self._savings_dividend = 13
 
