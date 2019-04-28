@@ -31,8 +31,8 @@ class Constants:
         return self._administrative_fee_received
 
     @property
-    def payment(self):
-        return self._payment
+    def payment_received(self):
+        return self._payment_received
 
     @property
     def pge_bill_paid(self):
@@ -51,8 +51,8 @@ class Constants:
         return self._savings_assessment
 
     @property
-    def savings_assessment_total(self):
-        return self._savings_assessment_total
+    def savings_assessment(self):
+        return self._savings_assessment
 
     @property
     def savings_deposit_made(self):

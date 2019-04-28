@@ -2,7 +2,8 @@ import logging
 import sys
 import sqlite3
 from lib import utils
-import constants
+from lib import constants
+
 
 def get_acct_balance(acct, cur):
     exec_str = f"""
@@ -40,6 +41,12 @@ def main():
     cur = database.cursor()
 
     acct = utils.prompt_for_account(logger, "Please choose an account", cur)
+    #
+    # show the current balance here
+    # fetch balance and display
+    cur_balance = get_acct_balance(acct, cur)
+    print(f"Current balance:\t{cur_balance:.2f}")
+    #
     date = utils.prompt_for_current_date(logger, "Payment date")
 
     # fetch amount and flip the sign
@@ -68,7 +75,7 @@ def main():
     # insert the account
     cur.execute(
         "INSERT INTO activity (date, acct, type, amount, note) VALUES (?, ?, ?, ?, ?)",
-        (date, acct, const.payment, amt, notes),
+        (date, acct, const.payment_received, amt, notes),
     )
 
     # fetch updated balance and display
