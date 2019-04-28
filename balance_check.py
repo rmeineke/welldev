@@ -31,6 +31,8 @@ def main():
     print(f"")
     utils.print_savings_account_balance(logger, cur)
     print(f"")
+    utils.print_main_account_balance(logger, cur)
+    print(f"")
 
     # close the cursor and db
     cur.close()

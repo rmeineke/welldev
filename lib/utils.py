@@ -115,6 +115,22 @@ def print_savings_account_balance(logger, cur):
     print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
 
 
+def print_main_account_balance(logger, cur):
+    logger.debug('Entering print_main_account_balance()')
+    exec_str = f"""
+            SELECT SUM(amount)
+            FROM activity 
+            WHERE type = (?)
+            OR type = (?)
+            OR type = (?)
+            OR type = (?)
+        """
+    const = constants.Constants()
+    params = (const.pge_bill_received, const.pge_bill_paid, const.savings_assessment, const.savings_deposit_made)
+    row = cur.execute(exec_str, params)
+    print(f"This figure should be close to 0:")
+    print(f"main account balance: {(row.fetchone()[0] / 100):12.2f}")
+
 def get_last_reading_date(logger, cur):
     exec_str = """
     SELECT reading_date FROM reading_dates ORDER BY reading_date DESC LIMIT 1
