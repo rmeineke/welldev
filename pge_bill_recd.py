@@ -137,20 +137,20 @@ def main():
         else:
             logger.debug(f'No assessment needed.')
 
-    # this needs to be put into the activity log
-
-    assessment_total = int(round(assessment_total, 2))
-
-    # write this to the db
-    exec_str = f"""
-                    INSERT INTO activity (date, type, amount, note) 
-                    VALUES (?, ?, ?, ?)
-                """
-    params = (bill_date, const.savings_assessment_total, assessment_total, 'Savings assessment total')
-    cur.execute(exec_str, params)
-    print(f'============================================================================')
-    print(f'==> assessment_total: {assessment_total / 100:.2f}')
-    print(f'============================================================================')
+    # # this needs to be put into the activity log
+    #
+    # assessment_total = int(round(assessment_total, 2))
+    #
+    # # write this to the db
+    # exec_str = f"""
+    #                 INSERT INTO activity (date, type, amount, note)
+    #                 VALUES (?, ?, ?, ?)
+    #             """
+    # params = (bill_date, const.savings_assessment_total, assessment_total, 'Savings assessment total')
+    # cur.execute(exec_str, params)
+    # print(f'============================================================================')
+    # print(f'==> assessment_total: {assessment_total / 100:.2f}')
+    # print(f'============================================================================')
 
     # save, then close the cursor and db
     db.commit()

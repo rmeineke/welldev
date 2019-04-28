@@ -94,7 +94,7 @@ def get_savings_balance(logger, cur):
         OR type = (?)
     """
     const = constants.Constants()
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     row = cur.execute(exec_str, params)
     cur_balance = row.fetchone()[0]
     return cur_balance
@@ -110,7 +110,7 @@ def print_savings_account_balance(logger, cur):
             OR type = (?)
         """
     const = constants.Constants()
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     row = cur.execute(exec_str, params)
     print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
 
