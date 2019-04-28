@@ -109,3 +109,4 @@ backups/*
 .idea/*
 .idea/misc.xml
 test.py
+2019*.db
