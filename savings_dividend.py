@@ -2,7 +2,7 @@ import logging
 import sys
 import sqlite3
 from lib import utils
-import constants
+from lib import constants
 
 
 def main():
@@ -27,7 +27,6 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-
     # check current balance here
     const = constants.Constants()
     exec_str = f"""
@@ -37,7 +36,7 @@ def main():
         OR type = (?)
         OR type = (?)
     """
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     logger.debug(f"params: {params}")
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
@@ -69,7 +68,7 @@ def main():
             OR type = (?)
             OR type = (?)
         """
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     print(f"{params}")
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
