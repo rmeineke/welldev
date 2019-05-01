@@ -75,14 +75,6 @@ def prompt_for_account(logger, prompt, cur):
         if int(acct) in acct_list:
             return acct
 
-#
-# def get_savings_balance(logger, db):
-#     # this is way neater than what follows
-#     logger.debug("Entering get_savings_balance()")
-#     row = cur.execute("SELECT sum(amount) FROM savings_account")
-#     cur_balance = row.fetchone()[0]
-#     return cur_balance
-
 
 def get_savings_balance(logger, cur):
     logger.debug('Entering get_savings_balance()')
@@ -130,6 +122,7 @@ def print_main_account_balance(logger, cur):
     row = cur.execute(exec_str, params)
     print(f"This figure should be close to 0:")
     print(f"main account balance: {(row.fetchone()[0] / 100):12.2f}")
+
 
 def get_last_reading_date(logger, cur):
     exec_str = """
@@ -273,22 +266,6 @@ def get_prev_balance(cur, acct_id, date, logger):
     # logger.debug(f"{exec_str}")
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
-#
-# 12||4|2019-02-27|-2800
-# 13|3|3|2019-02-27|-829
-# 14||7|2019-02-28|-5632
-# 15|3|3|2019-02-28|-1666
-# sqlite> select sum(amount) from master__account where acct_id = 1;
-# Error: no such table: master__account
-# sqlite> select sum(amount) from master_account where acct_id = 1;
-# 1746
-# sqlite> select sum(amount) from master_account where acct_id = 4;
-# 4115
-# sqlite> select sum(amount) from master_account where acct_id = 4 and date <= '2019-01-27';
-# 0
-# sqlite> select sum(amount) from master_account where acct_id = 4 and date <= '2019-01-28';
-# 1847
-# sqlite>
 
 
 def get_new_charges(cur, acct_id, date, logger):
@@ -330,9 +307,7 @@ def get_payments(cur, acct_id, date, logger):
         AND type = ?
         AND date >= ?
     """
-    params = (acct_id, const.payment, date)
+    params = (acct_id, const.payment_received, date)
     # logger.debug(f"{exec_str}")
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
-
-# select sum(transaction_amount) from transactions_log where acct_id = 1 and transaction_type = 3 and transaction_date >= '2018-01-01';

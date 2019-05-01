@@ -2,6 +2,7 @@ import logging
 import sys
 import sqlite3
 from lib import utils
+from lib import constants
 import account
 
 
@@ -78,65 +79,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-    #
-    #
-    #     exec_str = f"""
-    #         SELECT reading
-    #         FROM readings
-    #         WHERE account_id = {r['acct_id']}
-    #         ORDER BY reading_id
-    #         DESC
-    #         LIMIT 2
-    #     """
-    #
-    #     rows = cur.execute(exec_str)
-    #     reading_list = []
-    #     for row in rows:
-    #         reading_list.append(row['reading'])
-    #
-    #     acct_obj.latest_reading = reading_list[0]
-    #     current_reading = reading_list[0]
-    #     acct_obj.previous_reading = reading_list[1]
-    #     prev_reading = reading_list[1]
-    #     logger.debug(f"prev: {prev_reading}")
-    #     logger.debug(f"curr: {current_reading}")
-    #     acct_obj.calculate_current_usage()
-    #
-    #     logger.debug(f"curr usage, gallons: {acct_obj.current_usage:.2f}")
-    #     ttl_monthly_usage += acct_obj.current_usage_in_gallons
-    #
-    # exec_str = f"""
-    #         SELECT transaction_amount
-    #         FROM transactions_log
-    #         WHERE transaction_type = 5
-    #         ORDER BY transaction_date
-    #         DESC
-    #         LIMIT 1
-    #    """
-    # row = cur.execute(exec_str)
-    # pge_bill = row.fetchone()
-    # logger.debug(f"pge_bill: {pge_bill['transaction_amount']}")
-    #
-    # pct_sanity_chk = 0.0
-    # for acct in acct_list:
-    #     acct.calculate_current_usage_percent(ttl_monthly_usage)
-    #     logger.debug(f"curr usage pct: {acct.current_usage_percent:10.2f}")
-    #     pct_sanity_chk += acct.current_usage_percent
-    #     acct.calculate_pge_bill_percent(pge_bill['transaction_amount'])
-    #     logger.debug(f"pge_bill_share: {acct.pge_bill_share:10.2f}")
-    #
-    # print(f"\n")
-    # logger.debug(f"pct_sanity_chk: {pct_sanity_chk:10.2f}")
-    # logger.debug(f"ttl_monthly_usage: {ttl_monthly_usage}")
-    # #
-    # # exec_str = f"""
-    # #     SELECT transaction_amount
-    # #     FROM transactions_log
-    # #     WHERE transaction_type = 5
-    # # """
-    # # row = cur.execute(exec_str)
-    # # pge_bill = row.fetchone()
-    # # logger.debug(f"pge_bill: {pge_bill['transaction_amount']}")

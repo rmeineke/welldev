@@ -19,6 +19,8 @@ class Account:
 
         self.__prev_balance = -999999999.99
         self.__payments = 99999999.99
+        self.__adjustments = 99999999.99
+
 
     #
     # def __setattr__(self, name, value):
@@ -26,6 +28,14 @@ class Account:
 
     def __str__(self):
         return f"{self.__prev_balance}"
+
+    @property   
+    def prev_balance(self):
+        return self.__prev_balance
+
+    @prev_balance.setter
+    def prev_balance(self, value):
+        self.__prev_balance = value
 
     @property
     def payments(self):
@@ -35,14 +45,13 @@ class Account:
     def payments(self, value):
         self.__payments = value
 
-    # okay to here ...
     @property
-    def prev_balance(self):
-        return self.__prev_balance
+    def adjustments(self):
+        return self.__adjustments
 
-    @prev_balance.setter
-    def prev_balance(self, value):
-        self.__prev_balance = value
+    @adjustments.setter
+    def adjustments(self, value):
+        self.__adjustments = value
 
     @property
     def latest_reading(self):
