@@ -35,7 +35,7 @@ def main():
     for acct in data["accounts"]:
         logger.debug('in the acct loop')
         logger.debug(acct)
-        account_data_entry(cur, acct['first_name'], acct['last_name'], acct['address'], acct['reads_in'], acct['master'], acct['active'])
+        account_data_entry(cur, acct['first_name'], acct['last_name'], acct['file_alias'], acct['address'], acct['reads_in'], acct['master'], acct['active'])
 
     # save, then close the cursor and db
     db.commit()
@@ -50,15 +50,16 @@ def create_account_table(c, logger):
                 account(acct_id INTEGER PRIMARY KEY AUTOINCREMENT, \
                         first_name TEXT, \
                         last_name TEXT, \
+                        file_alias TEXT, \
                         address TEXT, \
                         reads_in TEXT, \
                         master TEXT, \
                         active TEXT)')
 
 
-def account_data_entry(c, fn, ln, a, reads, master, active):
-    c.execute('INSERT INTO account (first_name, last_name, address, reads_in, master, active) VALUES (?, ?, ?, ?, ?, ?)',
-              (fn, ln, str(a), reads, master, active))
+def account_data_entry(c, fn, ln, alias, a, reads, master, active):
+    c.execute('INSERT INTO account (first_name, last_name, file_alias, address, reads_in, master, active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              (fn, ln, str(alias), str(a), reads, master, active))
 
 
 if __name__ == '__main__':

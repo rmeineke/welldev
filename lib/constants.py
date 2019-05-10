@@ -19,6 +19,10 @@ class Constants:
         self._gallons_per_cubic_foot = 7.4805
 
     @property
+    def gallons_per_cubic_foot(self):
+        return self._gallons_per_cubic_foot
+
+    @property
     def account_adjustment(self):
         return self._account_adjustment
 

@@ -2,10 +2,11 @@
 
 
 class Account:
-    def __init__(self, acct_id, fn, ln, addr, reads_in, master):
+    def __init__(self, acct_id, fn, ln, alias, addr, reads_in, master):
         self.acct_id = acct_id
         self.fn = fn
         self.ln = ln
+        self.file_alias = alias
         self.addr = addr
         self.reads_in = reads_in
         self.master = master
@@ -20,6 +21,8 @@ class Account:
         self.__prev_balance = -999999999.99
         self.__payments = 99999999.99
         self.__adjustments = 99999999.99
+        self.__new_charges = 99999.99
+        self.__current_balance = -99999.99
 
 
     #
@@ -28,6 +31,38 @@ class Account:
 
     def __str__(self):
         return f"{self.__prev_balance}"
+
+    @property
+    def latest_reading(self):
+        return self.__latest_reading
+
+    @latest_reading.setter
+    def latest_reading(self, value):
+        self.__latest_reading = value
+
+    @property
+    def previous_reading(self):
+        return self.__previous_reading
+
+    @previous_reading.setter
+    def previous_reading(self, value):
+        self.__previous_reading = value
+
+    @property
+    def new_charges(self):
+        return self.__new_charges
+
+    @new_charges.setter
+    def new_charges(self, value):
+        self.__new_charges = value
+
+    @property
+    def current_balance(self):
+        return self.__current_balance
+
+    @current_balance.setter
+    def current_balance(self, value):
+        self.__current_balance = value
 
     @property   
     def prev_balance(self):
