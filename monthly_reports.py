@@ -36,6 +36,15 @@ def main():
     cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
     ttl_monthly_usage = 0
+
+    dates = utils.get_last_two_reading_dates(cur, logger)
+    start_date = dates[1]
+    end_date = dates[0]
+    readable_start_date = utils.make_date_readable(start_date)
+    readable_end_date = utils.make_date_readable(end_date)
+
+
+    logger.debug(f"{start_date} -> {end_date}")
     for r in rows:
         if r['active'] == 'no':
             logger.debug(f"account {r['acct_id']} is INACTIVE")
@@ -104,7 +113,6 @@ def main():
         # utils.generate_pdf(cur, acct_obj, logger)
     logger.debug(f"ttl_monthly_usage: {ttl_monthly_usage}")
 
-
     dates = utils.get_last_two_reading_dates(cur, logger)
 
     const = constants.Constants()
@@ -135,7 +143,7 @@ def main():
     # pass it in as a parameter ... otherwise we'll be hitting the
     # DB four times for the exact same information
     for acct in acct_list:
-        utils.generate_pdf(cur, acct, ttl_monthly_usage, savings_data_list, logger)
+        utils.generate_pdf(cur, acct, ttl_monthly_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger)
 
     # save, then close the cursor and db
     db.commit()

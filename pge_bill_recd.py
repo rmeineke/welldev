@@ -37,7 +37,10 @@ def main():
     logger.debug(f'pge_bill: {int(pge_bill)}')
 
     const = constants.Constants()
-    exec_str = f"INSERT INTO activity (date, type, amount, note) VALUES (?, ?, ?, ?)"
+    exec_str = f"""
+        INSERT INTO activity (date, type, amount, note) 
+        VALUES (?, ?, ?, ?)
+    """
     params = (bill_date, const.pge_bill_received, pge_bill, "PGE bill received")
     cur.execute(exec_str, params)
 

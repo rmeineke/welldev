@@ -24,11 +24,9 @@ class Account:
         self.__new_charges = 99999.99
         self.__current_balance = -99999.99
 
-
     #
     # def __setattr__(self, name, value):
     #     super().__setattr__(name, value)
-
     def __str__(self):
         return f"{self.__prev_balance}"
 

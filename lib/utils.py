@@ -4,12 +4,24 @@ import sqlite3
 from shutil import copyfile
 import fpdf
 from datetime import datetime
-
+import shutil
 from lib import constants
 
 
+def make_date_readable(d):
+    date_obj = datetime.strptime(d, "%Y-%m-%d")
+    return datetime.strftime(date_obj, "%m-%d-%Y")
+
+
 def generate_unique_pdf_filename(stub):
-    count = 0
+    """
+    generate unique (incrementing) filename for the pdf
+    output ... keeps from cl
+    :type stub: string
+    :param stub: filename stub
+    :return: full filename with .pdf extension
+    """
+    count: int = 0
     fn = stub + '.pdf'
     while True:
         if os.path.exists(fn):
@@ -20,7 +32,7 @@ def generate_unique_pdf_filename(stub):
             return fn
 
 
-def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
+def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
     logger.debug(f"entering generate_pdf")
 
     # let's get a few things set up here ...
@@ -31,6 +43,9 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     pdf = fpdf.FPDF('P', 'pt', 'Letter')
     pdf.add_page()
 
+    # #######################################################
+    # HEADERS Section
+    # #######################################################
     pdf.set_font('Arial', 'B', 16)
     lh = pdf.font_size
     pdf.cell(0, 0, f"{acct_obj.fn} {acct_obj.ln}")
@@ -40,13 +55,15 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     pdf.cell(0, 0, 'Aromas, CA  95004')
     pdf.ln(lh)
     pdf.ln(lh)
+    pdf.ln(lh)
+
+    # #######################################################
+    # ACCOUNT OVERVIEW Section
+    # #######################################################
+    # headers
     epw = pdf.w - (2 * pdf.l_margin)
     col_width = epw / 5
-
-    pdf.ln(lh)
     pdf.set_fill_color(220, 220, 220)
-
-    # headers
     pdf.set_font('Courier', '', 10)
     pdf.cell(col_width, lh, f"Previous Balance", border="LTR", align="C")
     pdf.cell(col_width, lh, f"Payments", border="LTR", align="C")
@@ -65,21 +82,18 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     pdf.cell(col_width, lh, f"{acct_obj.current_balance / 100:.2f}", border='LBR', align='C', fill=True)
     pdf.ln(lh)
 
-    # usage
+    # #######################################################
+    # USAGE Section
+    # #######################################################
     pdf.set_font('Arial', 'B', 12)
     pdf.ln(pdf.font_size)
     lh = pdf.font_size
-
-    # TODO: this needs to be moved out as well
-    # fetching this 4 times !
-    dates = get_last_two_reading_dates(cur, logger)
-
     pdf.ln()
+
     col_width = epw / 2
     pdf.cell(col_width, lh, f"Your usage:", border="B")
     pdf.set_font('Arial', '', 10)
-    # TODO: make these dates human-readable
-    pdf.cell(0, lh, f"{dates[1]} to {dates[0]}", border="B", align='R')
+    pdf.cell(0, lh, f"{readable_start_date} to {readable_end_date}", border="B", align='R')
     pdf.ln(lh)
     pdf.ln(lh)
     col_width = epw / 4
@@ -91,36 +105,80 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     pdf.cell(col_width, 0, f"Previous reading:")
     pdf.cell(col_width, 0, f"{acct_obj.previous_reading}", align='R')
     pdf.ln(lh)
-    pdf.cell(col_width, 0, f"Difference:")
-    pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
-    pdf.ln(lh)
 
-    # TODO: bust this into an if/else for those that read in gallons vs.
     # cubic feet
+    const = constants.Constants()
     if acct_obj.reads_in == 'cubic feet':
-        pdf.cell(col_width, 0, f"Usage (gallons -- {acct_obj.latest_reading - acct_obj.previous_reading} x 7.4805):")
+        pdf.cell(col_width, 0, f"Difference (cubic feet):")
+        pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
+        pdf.ln(lh)
+        pdf.cell(col_width, 0, f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot}):")
         pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
         pdf.ln(lh)
     else:
-        pdf.cell(col_width, 0, f"Usage (gallons):")
-        pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
+        pdf.cell(col_width, 0, f"Difference:")
+        pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
 
     pdf.cell(col_width, 0, f"Total well usage (gallons): ")
     pdf.cell(col_width, 0, f"{ttl_usage:.2f}", align="R")
     pdf.ln(lh)
     current_usage_percent = (round((acct_obj.current_usage / ttl_usage), 4) * 100)
-    pdf.cell(col_width, 0, f"Current usage percent: ")
-    pdf.cell(col_width, 0, f"{current_usage_percent:.2f}%", align="R")
+    pdf.cell(col_width, 0, f"Usage percent: ")
+    pdf.cell(col_width, 0, f"{current_usage_percent:.2f}", align="R")
     pdf.ln(lh)
 
+    # TODO: add in the PGE Bill and percentage calculation
 
+    # TODO: add in the savings assessment
+
+    # #######################################################
+    # ACCOUNT ACTIVITY Section
+    # #######################################################
     pdf.set_font('Arial', 'B', 12)
     lh = pdf.font_size
     pdf.ln(lh)
     pdf.cell(0, lh, f"Your account activity:", border="B")
     pdf.ln(lh)
+    pdf.ln(lh)
+    exec_str = f"""
+        SELECT *
+        FROM activity
+        WHERE (acct = ?)
+        AND (date >= ?)
+    """
+    params = (acct_obj.acct_id, start_date)
+    rows = cur.execute(exec_str, params)
+    pdf.set_font('Arial', '', 12)
+    col_width = epw / 6
+    for row in rows:
 
+        pdf.cell(col_width, 0, f"{make_date_readable(row['date'])}")
+
+        # note ... chk to see if it needs chopping up
+        # splits the string on the pipe (|) character
+        # then displays them on separate lines
+        notes = row['note'].split('|')
+        number_of_notes = len(notes)
+        if number_of_notes == 1:
+            pdf.cell(col_width * 2, 0, f"{row['note']}")
+            pdf.cell(col_width, 0, f"$ {row['amount'] / 100}", align="R")
+            pdf.ln(lh + 2)
+        else:
+            pdf.cell(col_width * 2, 0, f"{notes[0]}")
+            pdf.cell(col_width, 0, f"$ {row['amount'] / 100}", align="R")
+            pdf.ln(lh + 2)
+
+            for i in range(1, number_of_notes):
+                pdf.cell(col_width, 0, " ")
+                pdf.cell(col_width * 2, 0, f"{notes[i]}")
+                pdf.ln(lh + 2)
+
+
+
+    # #######################################################
+    # SAVINGS Section
+    # #######################################################
     pdf.set_font('Arial', 'B', 12)
     lh = pdf.font_size
     pdf.ln(lh)
@@ -129,34 +187,21 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     pdf.ln(lh)
     pdf.set_font('Arial', '', 12)
     for item in savings_data_list:
-        col_width = epw / 3
-        pdf.cell(col_width, 0, f"{item[1]} {item[0]}")
-        pdf.cell(col_width, 0, f"{item[2]}", align='R')
-        pdf.cell(col_width, 0, f"{item[3]}")
+        col_width = epw / 6
+        pdf.cell(col_width, 0, f"{make_date_readable(item[1])}")
+        pdf.cell(col_width * 1.5, 0, f"{item[0]}")
+        pdf.cell(col_width * 1.5, 0, f"{item[3]}")
+        pdf.cell(col_width, 0, f"$ {item[2]}", align='R')
         pdf.ln(lh + 2)
 
     bal = get_savings_balance(logger, cur)
     bal = bal / 100
     pdf.ln(lh)
-    pdf.cell(col_width, 0, f"Current savings account balance:")
-    pdf.set_font('Arial', 'BI', 12)
-    pdf.cell(0, 0, f" ${bal:.2f}")
-    #
-    # const = constants.Constants()
-    # exec_str = f"""
-    #     SELECT *
-    #     FROM activity
-    #     WHERE (type = ? OR type = ? OR type = ?)
-    #     AND
-    #     (date >= ?)
-    # """
-    # params = (const.savings_deposit_made, const.savings_dividend,
-    #           const.savings_disbursement, dates[1])
-    # rows = cur.execute(exec_str, params)
-    # for row in rows:
-    #     logger.debug(f".................... {row['date']} - {row['amount']}")
-    # footers .............................................
+    pdf.cell(0, 0, f"Current savings account balance:  $ {bal:.2f}")
 
+    # #######################################################
+    # FOOTERS Section
+    # #######################################################
     # 716 is as low as i can get this
     # without pushing to the next page
     pdf.set_y(716)
@@ -175,12 +220,10 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, logger):
     generated_str = f"File generated: {dt}"
     pdf.cell(0, 0, generated_str, align='R')
 
-    # TODO: add generate at / by rsm message at the bottom
-
     # write the file
     pdf.output(output_file, 'F')
-    # TODO: put a copy of the file in the backup folder
-
+    backup_filename = f"backups/{output_file}"
+    shutil.copyfile(output_file, backup_filename)
     logger.debug(f"leaving generate_pdf")
 
 
@@ -190,7 +233,7 @@ def backup_file(logger, fn):
     if not os.path.exists(backup_directory):
         os.makedirs(backup_directory)
 
-    dt = datetime.datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
+    dt = datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
 
     new_filename = os.path.join(backup_directory, dt + "__" + fn)
     logger.debug(f"backing up to: {new_filename}")
@@ -221,9 +264,9 @@ def prompt_for_current_date(logger, prompt):
         try:
             reading_date = input(f"{prompt}: ")
             # ................................................ 01/24/2019
-            date_obj = datetime.datetime.strptime(reading_date, "%m/%d/%Y")
+            date_obj = datetime.strptime(reading_date, "%m/%d/%Y")
             # ......................................... 2019-01-24
-            return datetime.datetime.strftime(date_obj, "%Y-%m-%d")
+            return datetime.strftime(date_obj, "%Y-%m-%d")
         except ValueError:
             print("Bad date ... try again.")
 
@@ -337,7 +380,6 @@ def print_transaction_log_balance(cur, logger):
         OR transaction_type = 6 
         OR transaction_type = 7
     """
-
     row = cur.execute(exec_str)
     logger.debug(f'row: {row}')
     cur_balance = row.fetchone()[0]
@@ -543,5 +585,7 @@ def set_current_usage(acct_obj, logger):
 
 
 def set_current_usage_percent(acct, ttl_usage):
+    # i think this could be a class method....
+    # since the class has all the info it needs
     pass
 
