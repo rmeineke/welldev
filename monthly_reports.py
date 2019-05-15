@@ -24,27 +24,35 @@ def main():
 
     logger = logging.getLogger()
     logger.debug("Entering main")
+    monthly_global_variables = {}
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
     last_pge_bill_recd_date = utils.get_last_pge_bill_recd_date(cur, logger)
+    last_pge_bill_recd_amount = utils.get_last_pge_bill_recd_amount(cur, logger)
+    print(f"............................. {last_pge_bill_recd_amount}")
+    monthly_global_variables['last_pge_bill_recd_amount'] = last_pge_bill_recd_amount
     logger.debug(f"last_pge_bill_recd_date: {last_pge_bill_recd_date}")
-
+    logger.debug(f"last_pge_bill_recd_amount: {last_pge_bill_recd_amount}")
+    monthly_global_variables['last_pge_bill_recd_date'] = last_pge_bill_recd_date
     acct_list = []
     cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
     ttl_monthly_usage = 0
+    monthly_global_variables['ttl_monthly_usage'] = 0.0
 
     dates = utils.get_last_two_reading_dates(cur, logger)
     start_date = dates[1]
+    monthly_global_variables['start_date'] = start_date
     end_date = dates[0]
+    monthly_global_variables['end_date'] = end_date
     readable_start_date = utils.make_date_readable(start_date)
+    monthly_global_variables['readable_start_date'] = readable_start_date
     readable_end_date = utils.make_date_readable(end_date)
+    monthly_global_variables['readable_end_date'] = readable_end_date
 
-
-    logger.debug(f"{start_date} -> {end_date}")
     for r in rows:
         if r['active'] == 'no':
             logger.debug(f"account {r['acct_id']} is INACTIVE")
@@ -63,6 +71,8 @@ def main():
 
         # calculate total usage for the community
         ttl_monthly_usage = ttl_monthly_usage + acct_obj.current_usage
+        monthly_global_variables['ttl_monthly_usage'] += acct_obj.current_usage
+
         logger.debug(f"ttl_monthly_usage>>>>>>>>>>>>: {ttl_monthly_usage}")
 
         # get and set the previous balance
@@ -111,8 +121,8 @@ def main():
         # are populate with their data ....
         # it will have to be in a loop of it's own
         # utils.generate_pdf(cur, acct_obj, logger)
-    logger.debug(f"ttl_monthly_usage: {ttl_monthly_usage}")
-
+    logger.debug(f"---------------- ttl_monthly_usage: {ttl_monthly_usage}")
+    logger.debug(f"------------------ {monthly_global_variables['ttl_monthly_usage']}")
     dates = utils.get_last_two_reading_dates(cur, logger)
 
     const = constants.Constants()
@@ -143,7 +153,7 @@ def main():
     # pass it in as a parameter ... otherwise we'll be hitting the
     # DB four times for the exact same information
     for acct in acct_list:
-        utils.generate_pdf(cur, acct, ttl_monthly_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger)
+        utils.generate_pdf(cur, acct, monthly_global_variables, ttl_monthly_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger)
 
     # save, then close the cursor and db
     db.commit()

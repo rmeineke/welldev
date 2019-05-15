@@ -13,6 +13,23 @@ def make_date_readable(d):
     return datetime.strftime(date_obj, "%m-%d-%Y")
 
 
+def get_last_pge_bill_recd_amount(cur, logger):
+    const = constants.Constants()
+    print(f" ................................. {const.pge_bill_received}")
+    exec_str = f"""
+        SELECT amount 
+        FROM activity
+        where type = ?
+        ORDER BY amount
+        ASC
+        LIMIT 1
+    """
+    params = (const.pge_bill_received,)
+    row = cur.execute(exec_str, params)
+    amount = row.fetchone()[0]
+    return amount
+
+
 def generate_unique_pdf_filename(stub):
     """
     generate unique (incrementing) filename for the pdf
@@ -32,7 +49,7 @@ def generate_unique_pdf_filename(stub):
             return fn
 
 
-def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
+def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
     logger.debug(f"entering generate_pdf")
 
     # let's get a few things set up here ...
@@ -129,6 +146,8 @@ def generate_pdf(cur, acct_obj, ttl_usage, savings_data_list, start_date, readab
     pdf.ln(lh)
 
     # TODO: add in the PGE Bill and percentage calculation
+    pdf.cell(col_width, 0, f"last bill: {monthly_global_variables['last_pge_bill_recd_amount']}")
+    pdf.cell(col_width, 0, f"last bill: {monthly_global_variables['last_pge_bill_recd_amount'] / current_usage_percent}")
 
     # TODO: add in the savings assessment
 
