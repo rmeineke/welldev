@@ -146,8 +146,13 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
     pdf.ln(lh)
 
     # TODO: add in the PGE Bill and percentage calculation
-    pdf.cell(col_width, 0, f"last bill: {monthly_global_variables['last_pge_bill_recd_amount']}")
-    pdf.cell(col_width, 0, f"last bill: {monthly_global_variables['last_pge_bill_recd_amount'] / current_usage_percent}")
+
+    pdf.cell(col_width, 0, f"last bill: $ {monthly_global_variables['last_pge_bill_recd_amount'] / 100}")
+    pct = round(current_usage_percent, 2)
+    pdf.ln(lh)
+    share = ((monthly_global_variables['last_pge_bill_recd_amount']) * pct) / 10000
+    share = round(share, 2)
+    pdf.cell(col_width, 0, f"share: $ {share}")
 
     # TODO: add in the savings assessment
 
