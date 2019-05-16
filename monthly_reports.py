@@ -32,7 +32,6 @@ def main():
 
     last_pge_bill_recd_date = utils.get_last_pge_bill_recd_date(cur, logger)
     last_pge_bill_recd_amount = utils.get_last_pge_bill_recd_amount(cur, logger)
-    print(f"............................. {last_pge_bill_recd_amount}")
     monthly_global_variables['last_pge_bill_recd_amount'] = last_pge_bill_recd_amount
     logger.debug(f"last_pge_bill_recd_date: {last_pge_bill_recd_date}")
     logger.debug(f"last_pge_bill_recd_amount: {last_pge_bill_recd_amount}")
@@ -42,6 +41,14 @@ def main():
     rows = cur.fetchall()
     ttl_monthly_usage = 0
     monthly_global_variables['ttl_monthly_usage'] = 0.0
+
+    savings_balance = utils.get_savings_balance(logger, cur)
+    # leave this in for testing:
+    # savings_balance = 1000000
+    if savings_balance < 1000000:
+        monthly_global_variables['assessment_needed'] = True
+    else:
+        monthly_global_variables['assessment_needed'] = False
 
     dates = utils.get_last_two_reading_dates(cur, logger)
     start_date = dates[1]
@@ -114,13 +121,7 @@ def main():
         logger.debug(f"new charges: {acct_obj.new_charges}")
 
         acct_obj.current_balance = acct_obj.prev_balance + acct_obj.adjustments + acct_obj.payments + acct_obj.new_charges
-        # logger.debug(f"balance: {balance}")
 
-        # this can't be inside the loop .... as we won't be able to
-        # calculate totals and percents until all the accounts
-        # are populate with their data ....
-        # it will have to be in a loop of it's own
-        # utils.generate_pdf(cur, acct_obj, logger)
     logger.debug(f"---------------- ttl_monthly_usage: {ttl_monthly_usage}")
     logger.debug(f"------------------ {monthly_global_variables['ttl_monthly_usage']}")
     dates = utils.get_last_two_reading_dates(cur, logger)
@@ -153,7 +154,7 @@ def main():
     # pass it in as a parameter ... otherwise we'll be hitting the
     # DB four times for the exact same information
     for acct in acct_list:
-        utils.generate_pdf(cur, acct, monthly_global_variables, ttl_monthly_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger)
+        utils.generate_pdf(cur, acct, monthly_global_variables, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger)
 
     # save, then close the cursor and db
     db.commit()

@@ -49,7 +49,7 @@ def generate_unique_pdf_filename(stub):
             return fn
 
 
-def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
+def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
     logger.debug(f"entering generate_pdf")
 
     # let's get a few things set up here ...
@@ -91,12 +91,44 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
 
     # data
     pdf.set_font('Courier', '', 10)
-    pdf.cell(col_width, lh, f"{acct_obj.prev_balance / 100:.2f}", border='LBR', align='C')
-    pdf.cell(col_width, lh, f"{acct_obj.payments / 100:.2f}", border='LBR', align='C')
-    pdf.cell(col_width, lh, f"{acct_obj.adjustments / 100:.2f}", border='LBR', align='C')
-    pdf.cell(col_width, lh, f"{acct_obj.new_charges / 100:.2f}", border='LBR', align='C')
+
+    value = acct_obj.prev_balance
+    if value < 0:
+        value = value * -1
+        pdf.cell(col_width, lh, f"-${value / 100:.2f}", border='LBR', align='C')
+    else:
+        pdf.cell(col_width, lh, f"${value / 100:.2f}", border='LBR', align='C')
+
+    value = acct_obj.payments
+    if value < 0:
+        value = value * -1
+        pdf.cell(col_width, lh, f"-${value / 100:.2f}", border='LBR', align='C')
+    else:
+        pdf.cell(col_width, lh, f"${value / 100:.2f}", border='LBR', align='C')
+
+    # this is the make the display a little nicer
+    # change this: $-6.93
+    # to
+    # this: -$6.93
+    # TODO: this needs to be done for all values ...
+    value = acct_obj.adjustments
+    if value < 0:
+        value = value * -1
+        pdf.cell(col_width, lh, f"-${value / 100:.2f}", border='LBR', align='C')
+    else:
+        pdf.cell(col_width, lh, f"${value / 100:.2f}", border='LBR', align='C')
+
+    # this one should be okay as the new charges should never be negative
+    pdf.cell(col_width, lh, f"${acct_obj.new_charges / 100:.2f}", border='LBR', align='C')
+
     pdf.set_font('Courier', 'B', 12)
-    pdf.cell(col_width, lh, f"{acct_obj.current_balance / 100:.2f}", border='LBR', align='C', fill=True)
+
+    value = acct_obj.current_balance
+    if value < 0:
+        value = value * -1
+        pdf.cell(col_width, lh, f"-${value / 100:.2f}", border='LBR', align='C', fill=True)
+    else:
+        pdf.cell(col_width, lh, f"${value / 100:.2f}", border='LBR', align='C', fill=True)
     pdf.ln(lh)
 
     # #######################################################
@@ -108,53 +140,61 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
     pdf.ln()
 
     col_width = epw / 2
-    pdf.cell(col_width, lh, f"Your usage:", border="B")
+    pdf.cell(col_width, lh, f"Your usage")
     pdf.set_font('Arial', '', 10)
-    pdf.cell(0, lh, f"{readable_start_date} to {readable_end_date}", border="B", align='R')
+    pdf.cell(0, lh, f"{readable_start_date} to {readable_end_date}", align='R')
     pdf.ln(lh)
+    pdf.ln(2)
+    pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
     pdf.ln(lh)
     col_width = epw / 4
     pdf.set_font('Arial', '', 12)
     lh = lh + 2
-    pdf.cell(col_width, 0, f"Latest reading:")
+    pdf.cell(col_width, 0, f"Latest reading")
     pdf.cell(col_width, 0, f"{acct_obj.latest_reading}", align='R')
     pdf.ln(lh)
-    pdf.cell(col_width, 0, f"Previous reading:")
+    pdf.cell(col_width, 0, f"Previous reading")
     pdf.cell(col_width, 0, f"{acct_obj.previous_reading}", align='R')
     pdf.ln(lh)
 
     # cubic feet
     const = constants.Constants()
     if acct_obj.reads_in == 'cubic feet':
-        pdf.cell(col_width, 0, f"Difference (cubic feet):")
+        pdf.cell(col_width, 0, f"Difference (cubic feet)")
         pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
         pdf.cell(col_width, 0, f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot}):")
         pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
         pdf.ln(lh)
     else:
-        pdf.cell(col_width, 0, f"Difference:")
+        pdf.cell(col_width, 0, f"Difference")
         pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
 
-    pdf.cell(col_width, 0, f"Total well usage (gallons): ")
-    pdf.cell(col_width, 0, f"{ttl_usage:.2f}", align="R")
+    pdf.cell(col_width, 0, f"Total well usage (gallons)")
+    pdf.cell(col_width, 0, f"{monthly_global_variables['ttl_monthly_usage']:.2f}", align="R")
     pdf.ln(lh)
-    current_usage_percent = (round((acct_obj.current_usage / ttl_usage), 4) * 100)
-    pdf.cell(col_width, 0, f"Usage percent: ")
+    current_usage_percent = (round((acct_obj.current_usage / monthly_global_variables['ttl_monthly_usage']), 4) * 100)
+    pdf.cell(col_width, 0, f"Usage percent")
     pdf.cell(col_width, 0, f"{current_usage_percent:.2f}", align="R")
     pdf.ln(lh)
-
-    # TODO: add in the PGE Bill and percentage calculation
-
-    pdf.cell(col_width, 0, f"last bill: $ {monthly_global_variables['last_pge_bill_recd_amount'] / 100}")
+    pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
+    pdf.ln(lh)
+    pdf.cell(col_width, 0, f"PGE bill")
+    pdf.cell(col_width, 0, f"${monthly_global_variables['last_pge_bill_recd_amount'] / 100}", align="R")
     pct = round(current_usage_percent, 2)
     pdf.ln(lh)
     share = ((monthly_global_variables['last_pge_bill_recd_amount']) * pct) / 10000
     share = round(share, 2)
-    pdf.cell(col_width, 0, f"share: $ {share}")
+    pdf.cell(col_width, 0, f"Your share of PGE bill ($ {monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})")
+    pdf.cell(col_width, 0, f"   ${share}", align="R")
 
-    # TODO: add in the savings assessment
+    if monthly_global_variables['assessment_needed']:
+        pdf.ln(lh)
+        pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
+        pdf.ln(lh)
+        pdf.cell(col_width * 2, 0, f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)")
+        pdf.cell(col_width, 0, f" ${acct_obj.current_usage * const.assessment_per_gallon:.2f}", align="R")
 
     # #######################################################
     # ACCOUNT ACTIVITY Section
@@ -162,8 +202,11 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
     pdf.set_font('Arial', 'B', 12)
     lh = pdf.font_size
     pdf.ln(lh)
-    pdf.cell(0, lh, f"Your account activity:", border="B")
     pdf.ln(lh)
+    pdf.cell(0, lh, f"Account activity")
+    pdf.ln(lh)
+    pdf.ln(2)
+    pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
     pdf.ln(lh)
     exec_str = f"""
         SELECT *
@@ -184,6 +227,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
         # then displays them on separate lines
         notes = row['note'].split('|')
         number_of_notes = len(notes)
+        # TODO: there is some repeated code here ... see if you can suss this out
         if number_of_notes == 1:
             pdf.cell(col_width * 2, 0, f"{row['note']}")
             pdf.cell(col_width, 0, f"$ {row['amount'] / 100}", align="R")
@@ -198,16 +242,16 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, ttl_usage, savings_dat
                 pdf.cell(col_width * 2, 0, f"{notes[i]}")
                 pdf.ln(lh + 2)
 
-
-
     # #######################################################
     # SAVINGS Section
     # #######################################################
     pdf.set_font('Arial', 'B', 12)
     lh = pdf.font_size
     pdf.ln(lh)
-    pdf.cell(0, lh, f"Savings account activity:", border="B")
+    pdf.cell(0, lh, f"Savings activity")
     pdf.ln(lh)
+    pdf.ln(2)
+    pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
     pdf.ln(lh)
     pdf.set_font('Arial', '', 12)
     for item in savings_data_list:
