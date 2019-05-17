@@ -15,8 +15,7 @@ def make_date_readable(d):
 
 def get_last_pge_bill_recd_amount(cur, logger):
     const = constants.Constants()
-    print(f" ................................. {const.pge_bill_received}")
-    exec_str = f"""
+    exec_str: str = f"""
         SELECT amount 
         FROM activity
         where type = ?
@@ -49,7 +48,7 @@ def generate_unique_pdf_filename(stub):
             return fn
 
 
-def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, start_date, readable_start_date, end_date, readable_end_date, logger):
+def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, logger):
     logger.debug(f"entering generate_pdf")
 
     # let's get a few things set up here ...
@@ -142,7 +141,9 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, sta
     col_width = epw / 2
     pdf.cell(col_width, lh, f"Your usage")
     pdf.set_font('Arial', '', 10)
-    pdf.cell(0, lh, f"{readable_start_date} to {readable_end_date}", align='R')
+    pdf.cell(0, lh,
+             f"{monthly_global_variables['readable_start_date']} to {monthly_global_variables['readable_end_date']}",
+             align='R')
     pdf.ln(lh)
     pdf.ln(2)
     pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
@@ -163,7 +164,8 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, sta
         pdf.cell(col_width, 0, f"Difference (cubic feet)")
         pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
-        pdf.cell(col_width, 0, f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot}):")
+        pdf.cell(col_width, 0,
+                 f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot}):")
         pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
         pdf.ln(lh)
     else:
@@ -193,7 +195,8 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, sta
         pdf.ln(lh)
         pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
         pdf.ln(lh)
-        pdf.cell(col_width * 2, 0, f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)")
+        pdf.cell(col_width * 2, 0,
+                 f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)")
         pdf.cell(col_width, 0, f" ${acct_obj.current_usage * const.assessment_per_gallon:.2f}", align="R")
 
     # #######################################################
@@ -208,13 +211,13 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, sta
     pdf.ln(2)
     pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
     pdf.ln(lh)
-    exec_str = f"""
+    exec_str: str = f"""
         SELECT *
         FROM activity
         WHERE (acct = ?)
         AND (date >= ?)
     """
-    params = (acct_obj.acct_id, start_date)
+    params = (acct_obj.acct_id, monthly_global_variables['start_date'])
     rows = cur.execute(exec_str, params)
     pdf.set_font('Arial', '', 12)
     col_width = epw / 6
@@ -262,10 +265,10 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, sta
         pdf.cell(col_width, 0, f"$ {item[2]}", align='R')
         pdf.ln(lh + 2)
 
-    bal = get_savings_balance(logger, cur)
-    bal = bal / 100
+    # bal = get_savings_balance(logger, cur)
+    # bal = bal / 100
     pdf.ln(lh)
-    pdf.cell(0, 0, f"Current savings account balance:  $ {bal:.2f}")
+    pdf.cell(0, 0, f"Current savings account balance: $ {monthly_global_variables['current_savings_balance'] / 100:.2f}")
 
     # #######################################################
     # FOOTERS Section
@@ -488,7 +491,7 @@ def print_account_balances(logger, cur):
             FROM activity
             WHERE acct = (?)
         """
-        params = (r['acct_id'], )
+        params = (r['acct_id'],)
         bal_row = cur.execute(exec_str, params)
         bal = bal_row.fetchone()[0]
         if bal is None:
@@ -505,7 +508,7 @@ def fetch_last_two_reading(cur, acct_id, logger):
         DESC
         LIMIT 2
     """
-    params = (acct_id, )
+    params = (acct_id,)
     rows = cur.execute(exec_str, params)
     return rows
 
@@ -521,7 +524,7 @@ def get_last_pge_bill_recd_date(cur, logger):
         ORDER BY date
         DESC
     """
-    params = (const.pge_bill_received, )
+    params = (const.pge_bill_received,)
     cur.execute(exec_str, params)
     row = cur.fetchone()
     return row['date']
@@ -656,4 +659,3 @@ def set_current_usage_percent(acct, ttl_usage):
     # i think this could be a class method....
     # since the class has all the info it needs
     pass
-
