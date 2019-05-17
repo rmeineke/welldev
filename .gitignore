@@ -111,4 +111,5 @@ backups/*
 test.py
 2019*.db
 70*.pdf
+710*.pdf
 .vscode/
