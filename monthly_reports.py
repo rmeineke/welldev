@@ -39,7 +39,7 @@ def main():
     monthly_global_variables["last_pge_bill_recd_date"] = last_pge_bill_recd_date
     logger.debug(f"last_pge_bill_recd_date: {last_pge_bill_recd_date}")
 
-    ttl_monthly_usage = 0
+    # ttl_monthly_usage = 0
     monthly_global_variables["ttl_monthly_usage"] = 0.0
 
     savings_balance = utils.get_savings_balance(logger, cur)
@@ -98,13 +98,15 @@ def main():
     rows = cur.fetchall()
 
     for r in rows:
+        logger.debug(f"=======================================================================")
+
         if r["active"] == "no":
             logger.debug(f"account {r['acct_id']} is INACTIVE")
             continue
 
         # init the accounts
         logger.debug(
-            f"\ninit an account ... add to acct list ... {r['last_name']} ... {r['acct_id']}"
+            f"init an account ... add to acct list ... {r['last_name']} ... {r['acct_id']}"
         )
         acct_obj = account.Account(
             r["acct_id"],
@@ -184,9 +186,9 @@ def main():
             + acct_obj.new_charges
         )
 
-    logger.debug(f"ttl_monthly_usage: {ttl_monthly_usage}")
+    # logger.debug(f"ttl_monthly_usage: {ttl_monthly_usage}")
     logger.debug(f"{monthly_global_variables['ttl_monthly_usage']}")
-    dates = utils.get_last_two_reading_dates(cur, logger)
+    # dates = utils.get_last_two_reading_dates(cur, logger)
 
     # # 333333333333333333333333333333333333333333333333333333333
     # const = constants.Constants()

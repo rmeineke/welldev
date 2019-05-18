@@ -55,10 +55,6 @@ class Constants:
         return self._savings_assessment
 
     @property
-    def savings_assessment(self):
-        return self._savings_assessment
-
-    @property
     def savings_deposit_made(self):
         return self._savings_deposit_made
 

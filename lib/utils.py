@@ -619,7 +619,7 @@ def get_pge_share(cur, acct_id, date, logger):
     """
     params = (acct_id, const.pge_bill_share, date)
     row = cur.execute(exec_str, params)
-    logger.debug(f"{row}")
+    # logger.debug(f"{row}")
     return row.fetchone()[0]
 
 
