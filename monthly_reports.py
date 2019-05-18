@@ -26,6 +26,12 @@ def main():
 
     logger: Logger = logging.getLogger()
     logger.debug("Entering main")
+
+    # this dictionary will hold the variables that are needed
+    # to process each account's nothing activity
+    # this is outside any loop so that the info only
+    # has to be culled once ... rather than each time the
+    # loop is run for each account
     monthly_global_variables = {}
 
     db = sqlite3.connect(database)

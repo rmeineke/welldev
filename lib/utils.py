@@ -399,74 +399,74 @@ def print_savings_account_balance(logger, cur):
     row = cur.execute(exec_str, params)
     print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
 
-
-def print_main_account_balance(logger, cur):
-    logger.debug('Entering print_main_account_balance()')
-    exec_str = f"""
-            SELECT SUM(amount)
-            FROM activity 
-            WHERE type = (?)
-            OR type = (?)
-            OR type = (?)
-            OR type = (?)
-        """
-    const = constants.Constants()
-    params = (const.pge_bill_received, const.pge_bill_paid, const.savings_assessment, const.savings_deposit_made)
-    row = cur.execute(exec_str, params)
-    print(f"This figure should be close to 0:")
-    print(f"main account balance: {(row.fetchone()[0] / 100):12.2f}")
-
-
-def get_last_reading_date(logger, cur):
-    exec_str = """
-    SELECT reading_date FROM reading_dates ORDER BY reading_date DESC LIMIT 1
-    """
-    row = cur.execute(exec_str)
-    return row.fetchone()[0]
+#
+# def print_main_account_balance(logger, cur):
+#     logger.debug('Entering print_main_account_balance()')
+#     exec_str = f"""
+#             SELECT SUM(amount)
+#             FROM activity
+#             WHERE type = (?)
+#             OR type = (?)
+#             OR type = (?)
+#             OR type = (?)
+#         """
+#     const = constants.Constants()
+#     params = (const.pge_bill_received, const.pge_bill_paid, const.savings_assessment, const.savings_deposit_made)
+#     row = cur.execute(exec_str, params)
+#     print(f"This figure should be close to 0:")
+#     print(f"main account balance: {(row.fetchone()[0] / 100):12.2f}")
 
 
-def get_balance_from_transaction_log(db, logger):
-    logger.debug("Entering get_balance_from_transaction_log")
-    db = sqlite3.connect(db)
-    cur = db.cursor()
-    row = cur.execute(
-        "SELECT SUM(transaction_amount) "
-        "FROM transactions_log "
-        "WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7"
-    )
-    cur_balance = row.fetchone()[0]
-    cur.close()
-    db.close()
-    return cur_balance
+# def get_last_reading_date(logger, cur):
+#     exec_str = """
+#     SELECT reading_date FROM reading_dates ORDER BY reading_date DESC LIMIT 1
+#     """
+#     row = cur.execute(exec_str)
+#     return row.fetchone()[0]
 
 
-def print_transaction_log_balance(cur, logger):
-    logger.debug('Entering get_transaction_log_balance()')
-
-    exec_str = f"""
-        SELECT SUM(transaction_amount) 
-        FROM transactions_log 
-        WHERE transaction_type = 4 
-        OR transaction_type = 5 
-        OR transaction_type = 6 
-        OR transaction_type = 7
-    """
-    row = cur.execute(exec_str)
-    logger.debug(f'row: {row}')
-    cur_balance = row.fetchone()[0]
-    print(f'transaction log balance: {cur_balance / 100:9.2f}')
+# def get_balance_from_transaction_log(db, logger):
+#     logger.debug("Entering get_balance_from_transaction_log")
+#     db = sqlite3.connect(db)
+#     cur = db.cursor()
+#     row = cur.execute(
+#         "SELECT SUM(transaction_amount) "
+#         "FROM transactions_log "
+#         "WHERE transaction_type = 4 OR transaction_type = 5 OR transaction_type = 6  OR transaction_type = 7"
+#     )
+#     cur_balance = row.fetchone()[0]
+#     cur.close()
+#     db.close()
+#     return cur_balance
 
 
-def print_master_account_balance(cur, logger):
-    logger.debug('Entering get_master_account_balance()')
+# def print_transaction_log_balance(cur, logger):
+#     logger.debug('Entering get_transaction_log_balance()')
+#
+#     exec_str = f"""
+#         SELECT SUM(transaction_amount)
+#         FROM transactions_log
+#         WHERE transaction_type = 4
+#         OR transaction_type = 5
+#         OR transaction_type = 6
+#         OR transaction_type = 7
+#     """
+#     row = cur.execute(exec_str)
+#     logger.debug(f'row: {row}')
+#     cur_balance = row.fetchone()[0]
+#     print(f'transaction log balance: {cur_balance / 100:9.2f}')
 
-    exec_str = f"""
-    SELECT sum(amount) FROM master_account
-    """
 
-    row = cur.execute(exec_str)
-    cur_balance = row.fetchone()[0]
-    print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
+# def print_master_account_balance(cur, logger):
+#     logger.debug('Entering get_master_account_balance()')
+#
+#     exec_str = f"""
+#     SELECT sum(amount) FROM master_account
+#     """
+#
+#     row = cur.execute(exec_str)
+#     cur_balance = row.fetchone()[0]
+#     print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
 
 
 def print_account_balances(logger, cur):
@@ -653,9 +653,3 @@ def set_current_usage(acct_obj, logger):
         usage = round((usage * const.gallons_per_cubic_foot), 2)
     logger.debug(f"CONVERTED usage: {usage:.2f}")
     acct_obj.current_usage = usage
-
-
-def set_current_usage_percent(acct, ttl_usage):
-    # i think this could be a class method....
-    # since the class has all the info it needs
-    pass
