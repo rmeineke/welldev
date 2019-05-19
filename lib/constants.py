@@ -1,8 +1,7 @@
 class Constants:
-
     def __init__(self):
         self._account_adjustment = 1
-        self._administrative_fee_received= 2
+        self._administrative_fee_received = 2
         self._administrative_fee_paid = 3
         self._misc_rebate_received = 4
         self._misc_rebate_disbursed = 5

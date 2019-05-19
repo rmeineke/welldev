@@ -5,7 +5,7 @@ from lib import utils
 
 
 def main():
-    database = "well.db"
+    database = "well.sqlite"
 
     # set up for logging
     LEVELS = {
@@ -28,37 +28,33 @@ def main():
     cur = db.cursor()
 
     reading_date = utils.prompt_for_current_date(logger, "Reading date")
-    exec_str = f"""
-        INSERT INTO reading_date (date) 
-        VALUES (?)
-    """
-    params = (reading_date, )
+    exec_str = "INSERT INTO reading_date (date) VALUES (?)"
+    params = (reading_date,)
     logger.debug(f"{exec_str}{params}")
     cur.execute(exec_str, params)
     last_inserted_row_id = cur.lastrowid
 
     logger.debug("attempting to backup the database file now")
-    utils.backup_file(logger, database)
+    backup_file_name = utils.backup_file(logger, database)
+    logger.debug(f"Database backed up to: {backup_file_name}")
 
-    exec_str = f"""
-        SELECT * FROM account
-    """
+    exec_str = "SELECT * FROM account"
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
-        if r['active'] == 'no':
+        if r["active"] == "no":
             logger.debug(f"Account {r['acct_id']} currently INACTIVE")
             continue
 
         # fetch last month's reading as a sanity check
         exec_str = f"""
-            SELECT reading 
-            FROM reading 
+            SELECT reading
+            FROM reading
             WHERE account_id = (?)
-            ORDER BY reading_id 
+            ORDER BY reading_id
             DESC
         """
-        params = (r["acct_id"], )
+        params = (r["acct_id"],)
         cur.execute(exec_str, params)
         last_reading = cur.fetchone()
         print(f"Last month's reading: {last_reading['reading']}")

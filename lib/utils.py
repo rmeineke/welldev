@@ -309,6 +309,7 @@ def backup_file(logger, fn):
     new_filename = os.path.join(backup_directory, dt + "__" + fn)
     logger.debug(f"backing up to: {new_filename}")
     copyfile(fn, new_filename)
+    return new_filename
 
 
 def prompt_for_amount(logger, prompt):
