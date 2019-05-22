@@ -27,7 +27,7 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    reading_date = utils.prompt_for_current_date(logger, "Reading date")
+    reading_date: str = utils.prompt_for_current_date(logger, "Reading date")
     exec_str = "INSERT INTO reading_date (date) VALUES (?)"
     params = (reading_date,)
     logger.debug(f"{exec_str}{params}")
@@ -36,7 +36,7 @@ def main():
 
     logger.debug("attempting to backup the database file now")
     backup_file_name = utils.backup_file(logger, database)
-    logger.debug(f"Database backed up to: {backup_file_name}")
+    logger.debug(f"database backed up to: {backup_file_name}")
 
     exec_str = "SELECT * FROM account"
     cur.execute(exec_str)

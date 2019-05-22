@@ -298,7 +298,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
     logger.debug(f"leaving generate_pdf")
 
 
-def backup_file(logger, fn):
+def backup_file(logger: object, fn: object) -> str:
     logger.debug("entering backup_file")
     backup_directory = "./backups"
     if not os.path.exists(backup_directory):
@@ -355,7 +355,7 @@ def prompt_for_notes(logger, prompt):
     return input_str.strip()
 
 
-def prompt_for_account(logger, prompt, cur):
+def prompt_for_account(logger, prompt, cur) -> str:
     # get the account list
     cur.execute("SELECT * FROM account")
     rows = cur.fetchall()

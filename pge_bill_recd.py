@@ -7,7 +7,7 @@ from lib import constants
 
 
 def main():
-    database = 'well.db'
+    database = 'well.sqlite'
 
     # set up for logging
     LEVELS = {'debug': logging.DEBUG,
@@ -60,7 +60,7 @@ def main():
         acct_list.append(acct_obj)
 
         # fetch the last two reading rows from the db
-        query = f"""
+        query: str = f"""
             SELECT reading 
             FROM reading
             WHERE account_id = (?)
@@ -139,21 +139,6 @@ def main():
             logger.debug(f'Bill total: {int(round(acct.savings_assessment + acct.pge_bill_share, 2))}')
         else:
             logger.debug(f'No assessment needed.')
-
-    # # this needs to be put into the activity log
-    #
-    # assessment_total = int(round(assessment_total, 2))
-    #
-    # # write this to the db
-    # exec_str = f"""
-    #                 INSERT INTO activity (date, type, amount, note)
-    #                 VALUES (?, ?, ?, ?)
-    #             """
-    # params = (bill_date, const.savings_assessment_total, assessment_total, 'Savings assessment total')
-    # cur.execute(exec_str, params)
-    # print(f'============================================================================')
-    # print(f'==> assessment_total: {assessment_total / 100:.2f}')
-    # print(f'============================================================================')
 
     # save, then close the cursor and db
     db.commit()
