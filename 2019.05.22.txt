@@ -16,3 +16,242 @@ Olivares            ...     65.18%
 percents_total:     ...    100.00%
 
 (venv) [20:36] robertm -- /home/robertm/programming/welldev $
+
+
+robertm@sys76:~/well$ ./bal_ck.pl
+===================
+-- Balance Check --
+===================
+
+704 -    6.66
+706 -    0.00
+708 -  186.84
+710 -   17.80
+
+
+reg_ttl  == $  24.46
+mstr_ttl == $ 186.84
+ttl      == $   0.00
+
+robertm@sys76:~/well$ ./readings.pl
+Date: 05/22/2019
+Readings:
+704 : 2712480
+706 : 435120
+708 : 523750
+710 : 691746
+3484
+6365.91
+5198.95
+28164.08
+
+704: 8.06%	16.85
+706: 14.73%	30.79
+708: 12.03%	25.14
+710: 65.18%	136.23
+              -------
+               209.01
+              =======
+
+===================
+-- Balance Check --
+===================
+
+704 -    6.66
+706 -    0.00
+708 -  186.84
+710 -   17.80
+
+
+reg_ttl  == $  24.46
+mstr_ttl == $ 186.84
+ttl      == $   0.00
+
+robertm@sys76:~/well$ ./pge_bill_recd.pl
+PGE Bill Amount: 68.19
+ttl usage == 43212.94
+savings_balance == 9315.36
+
+Writing assessments . . .
+704 -- 8.71
+
+706 -- 15.91
+
+708 -- 13.00
+
+710 -- 70.41
+
+------------------------------------
+------------------------------------
+ttl_assessment: 108.03
+------------------------------------
+------------------------------------
+===================
+-- Balance Check --
+===================
+
+704 -   20.87
+706 -   25.95
+708 -  208.04
+710 -  132.66
+
+
+reg_ttl  == $ 179.48
+mstr_ttl == $ 208.04
+ttl      == $   0.00
+
+robertm@sys76:~/well$ ./pge_bill_paid.pl
+Date: 05/22/2019
+Amount: 68.19
+Check: EFT
+===================
+-- Balance Check --
+===================
+
+704 -   20.87
+706 -   25.95
+708 -  139.85
+710 -  132.66
+
+
+reg_ttl  == $ 179.48
+mstr_ttl == $ 139.85
+ttl      == $   0.00
+
+robertm@sys76:~/well$
+
+
+robertm@sys76:~/well$ ./savings_deposit.pl
+Date: 05/23/2019
+Amount: 108.03
+Check: EFT
+Enter month and year: May 2019
+
+savings_balance == -99999999.99
+./savings_deposit.pl: savings_balance == 9315.36
+
+savings_balance == 9423.39
+
+
+savings_balance == 9423.39
+
+
+
+
+===================
+-- Balance Check --
+===================
+
+704 -   20.87
+706 -   25.95
+708 -   31.82
+710 -  132.66
+
+
+reg_ttl  == $ 179.48
+mstr_ttl == $  31.82
+ttl      == $   0.00
+
+robertm@sys76:~/well$ ^C
+robertm@sys76:~/well$
+
+
+
+(venv) robertm@sys76:~/programming/welldev$ python savings_deposit_made.py
+===============================================
+ current savings balance: $9,315.36
+===============================================
+Date deposit made: 05/23/2019
+Amount of deposit: $108.03
+Notes for this deposit [q to quit]: May 2019 assessments
+Notes for this deposit [q to quit]: q
+(11, 12, 13)
+===============================================
+ current savings balance: $ 9,423.39
+===============================================
+(venv) robertm@sys76:~/programming/welldev$
+
+
+g/welldev$ ae
+(venv) robertm@sys76:~/programming/welldev$ python monthly_reports.py logger=debug
+DEBUG:root:Entering main
+DEBUG:root:entering get_last_pge_bill_recd_date
+DEBUG:root:last_pge_bill_recd_amount: 6819
+DEBUG:root:last_pge_bill_recd_date: 2019-05-22
+DEBUG:root:Entering get_savings_balance()
+DEBUG:root:entering get_last_two_reading_dates
+DEBUG:root:get_last_two_reading_dates ... returning: ['2019-05-22', '2019-04-24']
+DEBUG:root:Entering get_savings_balance()
+DEBUG:root:.................... 11 - 2019-04-25 - 4698 - April 2019 assessments
+DEBUG:root:.................... 11 - 2019-05-23 - 10803 - May 2019 assessments
+DEBUG:root:[['Deposit made', '2019-04-25', 46.98, 'April 2019 assessments'], ['Deposit made', '2019-05-23', 108.03, 'May 2019 assessments']]
+DEBUG:root:=======================================================================
+DEBUG:root:init an account ... add to acct list ... Schultz ... 1
+DEBUG:root:reading: 2712480
+DEBUG:root:reading: 2708996
+DEBUG:root:[2712480, 2708996]
+DEBUG:root:raw usage: 3484 -- gallons
+DEBUG:root:CONVERTED usage: 3484.00
+DEBUG:root:prev_balance: 666
+DEBUG:root:adjustments: 0
+DEBUG:root:1 -- 2019-05-22
+DEBUG:root:pge_bill_share: 550
+DEBUG:root:payments: 0
+DEBUG:root:new charges: 1421
+DEBUG:root:=======================================================================
+DEBUG:root:init an account ... add to acct list ... Cain ... 2
+DEBUG:root:reading: 435120
+DEBUG:root:reading: 434269
+DEBUG:root:[435120, 434269]
+DEBUG:root:raw usage: 851 -- cubic feet
+DEBUG:root:CONVERTED usage: 6365.91
+DEBUG:root:prev_balance: 0
+DEBUG:root:adjustments: 0
+DEBUG:root:2 -- 2019-05-22
+DEBUG:root:pge_bill_share: 1004
+DEBUG:root:payments: 0
+DEBUG:root:new charges: 2595
+DEBUG:root:=======================================================================
+DEBUG:root:init an account ... add to acct list ... Meineke ... 3
+DEBUG:root:reading: 523750
+DEBUG:root:reading: 523055
+DEBUG:root:[523750, 523055]
+DEBUG:root:raw usage: 695 -- cubic feet
+DEBUG:root:CONVERTED usage: 5198.95
+DEBUG:root:prev_balance: 0
+DEBUG:root:adjustments: 0
+DEBUG:root:3 -- 2019-05-22
+DEBUG:root:pge_bill_share: 820
+DEBUG:root:payments: 0
+DEBUG:root:new charges: 2120
+DEBUG:root:=======================================================================
+DEBUG:root:init an account ... add to acct list ... Olivares ... 4
+DEBUG:root:reading: 691746
+DEBUG:root:reading: 687981
+DEBUG:root:[691746, 687981]
+DEBUG:root:raw usage: 3765 -- cubic feet
+DEBUG:root:CONVERTED usage: 28164.08
+DEBUG:root:prev_balance: 1780
+DEBUG:root:adjustments: 0
+DEBUG:root:4 -- 2019-05-22
+DEBUG:root:pge_bill_share: 4445
+DEBUG:root:payments: 0
+DEBUG:root:new charges: 11486
+DEBUG:root:=======================================================================
+DEBUG:root:account 5 is INACTIVE
+DEBUG:root:43212.94
+DEBUG:root:entering generate_pdf
+output_file: 704--2019.05.23.pdf
+DEBUG:root:leaving generate_pdf
+DEBUG:root:entering generate_pdf
+output_file: 706--2019.05.23.pdf
+DEBUG:root:leaving generate_pdf
+DEBUG:root:entering generate_pdf
+output_file: 708--2019.05.23.pdf
+DEBUG:root:leaving generate_pdf
+DEBUG:root:entering generate_pdf
+output_file: 710--2019.05.23.pdf
+DEBUG:root:leaving generate_pdf
+(venv) robertm@sys76:~/programming/welldev$
+
+

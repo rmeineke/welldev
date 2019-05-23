@@ -15,12 +15,22 @@ def make_date_readable(d):
 
 def get_last_pge_bill_recd_amount(cur, logger):
     const = constants.Constants()
+    # exec_str: str = f"""
+    #     SELECT amount
+    #     FROM activity
+    #     where type = ?
+    #     ORDER BY amount
+    #     ASC
+    #     LIMIT 1
+    # """
+    # ooops, needed to sort by the date ... not the amount
+    # this should take care of it...
     exec_str: str = f"""
         SELECT amount 
         FROM activity
         where type = ?
-        ORDER BY amount
-        ASC
+        ORDER BY date
+        DESC
         LIMIT 1
     """
     params = (const.pge_bill_received,)
@@ -165,7 +175,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
         pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
         pdf.cell(col_width, 0,
-                 f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot}):")
+                 f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot})")
         pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
         pdf.ln(lh)
     else:
@@ -189,7 +199,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
     share = ((monthly_global_variables['last_pge_bill_recd_amount']) * pct) / 10000
     share = round(share, 2)
     pdf.cell(col_width, 0, f"Your share of PGE bill ($ {monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})")
-    pdf.cell(col_width, 0, f"   ${share}", align="R")
+    pdf.cell(col_width, 0, f"   ${share:.2f}", align="R")
 
     if monthly_global_variables['assessment_needed']:
         pdf.ln(lh)
@@ -233,11 +243,11 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
         # TODO: there is some repeated code here ... see if you can suss this out
         if number_of_notes == 1:
             pdf.cell(col_width * 2, 0, f"{row['note']}")
-            pdf.cell(col_width, 0, f"$ {row['amount'] / 100}", align="R")
+            pdf.cell(col_width, 0, f"$ {row['amount'] / 100:.2f}", align="R")
             pdf.ln(lh + 2)
         else:
             pdf.cell(col_width * 2, 0, f"{notes[0]}")
-            pdf.cell(col_width, 0, f"$ {row['amount'] / 100}", align="R")
+            pdf.cell(col_width, 0, f"$ {row['amount'] / 100:.2f}", align="R")
             pdf.ln(lh + 2)
 
             for i in range(1, number_of_notes):
