@@ -4,17 +4,17 @@ import sqlite3
 from lib import utils
 from lib import constants
 
-
-def get_acct_balance(acct, cur):
-    exec_str = f"""
-        SELECT SUM(amount) 
-        FROM activity 
-        WHERE acct = (?)
-    """
-    params = (acct, )
-    row = cur.execute(exec_str, params)
-    bal = row.fetchone()[0]
-    return bal / 100
+# Found this stray file .... moved into the utils file
+# def get_acct_balance(acct, cur):
+#     exec_str = f"""
+#         SELECT SUM(amount)
+#         FROM activity
+#         WHERE acct = (?)
+#     """
+#     params = (acct, )
+#     row = cur.execute(exec_str, params)
+#     bal = row.fetchone()[0]
+#     return bal / 100
 
 
 def main():
@@ -44,9 +44,11 @@ def main():
     #
     # show the current balance here
     # fetch balance and display
-    cur_balance = get_acct_balance(acct, cur)
+    cur_balance = utils.get_acct_balance(acct, cur)
     print(f"Current balance:\t{cur_balance:.2f}")
-    #
+    if cur_balance == 0:
+        exit(0)
+
     date = utils.prompt_for_current_date(logger, "Payment date")
 
     # fetch amount and flip the sign
@@ -65,7 +67,7 @@ def main():
     logger.debug(notes)
 
     # fetch balance and display
-    cur_balance = get_acct_balance(acct, cur)
+    cur_balance = utils.get_acct_balance(acct, cur)
     print(f"\n\nCurrent balance:\t{cur_balance:.2f}")
 
     # backup the file prior to adding any data

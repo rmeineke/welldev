@@ -1,11 +1,25 @@
 import datetime
 import os
-import sqlite3
 from shutil import copyfile
 import fpdf
 from datetime import datetime
 import shutil
 from lib import constants
+
+
+def get_acct_balance(acct, cur):
+    exec_str = f"""
+        SELECT SUM(amount) 
+        FROM activity 
+        WHERE acct = (?)
+    """
+    params = (acct, )
+    row = cur.execute(exec_str, params)
+    bal = row.fetchone()[0]
+    if bal is None:
+        return 0;
+    else:
+        return bal / 100
 
 
 def make_date_readable(d):
