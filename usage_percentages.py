@@ -55,9 +55,7 @@ def main():
         # need to collect them both in a list for further processing
         readings_list = []
         for row in rows:
-            readings_list.append(
-                row["reading"]
-            )
+            readings_list.append(row["reading"])
 
         logger.debug(f"reads in: {acct_obj.reads_in}")
         logger.debug(f"readings_list: {readings_list}")
