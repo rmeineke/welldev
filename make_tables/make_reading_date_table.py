@@ -19,7 +19,7 @@ def main():
     logger = logging.getLogger()
     logger.debug('Entering Main')
 
-    db = sqlite3.connect('../well.db')
+    db = sqlite3.connect('../well.sqlite')
     cur = db.cursor()
 
     logger.debug('calling create_readings_table')

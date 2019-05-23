@@ -4,7 +4,7 @@ import sqlite3
 
 
 def main():
-    db = '../well.db'
+    db = '../well.sqlite'
 
     # set up for logging
     LEVELS = {'debug': logging.DEBUG,

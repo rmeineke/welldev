@@ -5,7 +5,7 @@ import constants
 
 
 def main():
-    database = 'well.db'
+    database = 'well.sqlite'
 
     # set up for logging
     LEVELS = {'debug': logging.DEBUG,

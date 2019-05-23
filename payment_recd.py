@@ -18,7 +18,7 @@ def get_acct_balance(acct, cur):
 
 
 def main():
-    db = "well.db"
+    db = "well.sqlite"
 
     # set up for logging
     LEVELS = {
