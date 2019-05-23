@@ -56,7 +56,7 @@ def main():
         if r['active'] == 'no':
             logger.debug(f"Account {r['acct_id']} currently INACTIVE")
             continue
-        acct_obj = account.Account(r['acct_id'], r['first_name'], r['last_name'], r['address'], r['reads_in'], ['master'])
+        acct_obj = account.Account(r['acct_id'], r['first_name'], r['last_name'], r['file_alias'], r['address'], r['reads_in'], r['master'])
         acct_list.append(acct_obj)
 
         # fetch the last two reading rows from the db

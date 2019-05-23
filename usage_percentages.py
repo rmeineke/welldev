@@ -6,7 +6,7 @@ from lib import utils
 
 
 def main():
-    database = "well.db"
+    database = "well.sqlite"
 
     # set up for logging
     LEVELS = {
@@ -41,6 +41,7 @@ def main():
             r["acct_id"],
             r["first_name"],
             r["last_name"],
+            r["file_alias"],
             r["address"],
             r["reads_in"],
             r["master"],

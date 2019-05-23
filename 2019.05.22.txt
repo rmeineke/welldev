@@ -1,0 +1,18 @@
+(venv) [20:36] robertm -- /home/robertm/programming/welldev $ python balance_check.py
+
+1 -- Schultz    .......      20.87
+2 -- Cain       .......      25.95
+3 -- Meineke    .......      21.20
+4 -- Olivares   .......     132.66
+
+savings account balance:   9315.36
+
+(venv) [20:36] robertm -- /home/robertm/programming/welldev $ python usage_percentages.py
+Schultz             ...      8.06%
+Cain                ...     14.73%
+Meineke             ...     12.03%
+Olivares            ...     65.18%
+
+percents_total:     ...    100.00%
+
+(venv) [20:36] robertm -- /home/robertm/programming/welldev $
