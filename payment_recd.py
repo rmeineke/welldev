@@ -45,13 +45,14 @@ def main():
     # show the current balance here
     # fetch balance and display
     cur_balance = utils.get_acct_balance(acct, cur)
-    print(f"Current balance:\t{cur_balance:.2f}")
     if cur_balance == 0:
+        print(f"This account has a zero balance.")
         exit(0)
 
     date = utils.prompt_for_current_date(logger, "Payment date")
 
     # fetch amount and flip the sign
+    print(f"Current balance: ${cur_balance:.2f}")
     amt = utils.prompt_for_amount(logger, "Payment amount")
     logger.debug(f"get_amount just returned this amount: {amt}")
     amt *= -1
@@ -66,10 +67,6 @@ def main():
     logger.debug(acct)
     logger.debug(notes)
 
-    # fetch balance and display
-    cur_balance = utils.get_acct_balance(acct, cur)
-    print(f"\n\nCurrent balance:\t{cur_balance:.2f}")
-
     # backup the file prior to adding any data
     utils.backup_file(logger, db)
 
@@ -81,8 +78,8 @@ def main():
     )
 
     # fetch updated balance and display
-    cur_balance = get_acct_balance(acct, cur)
-    print(f"Updated balance:\t{cur_balance:.2f}\n")
+    cur_balance = utils.get_acct_balance(acct, cur)
+    print(f"Updated balance: ${cur_balance:.2f}\n")
 
     # save, then close the cursor and database
     database.commit()

@@ -6,6 +6,8 @@ from datetime import datetime
 import shutil
 from lib import constants
 
+constantTest = 999
+
 
 def get_acct_balance(acct, cur):
     exec_str = f"""

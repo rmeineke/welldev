@@ -7,6 +7,8 @@ from lib import utils
 import account
 from lib import constants
 
+print(f"{utils.constantTest}")
+
 
 def main():
     database = "well.sqlite"
