@@ -13,6 +13,8 @@ class Constants:
         self._savings_deposit_made = 11
         self._savings_disbursement = 12
         self._savings_dividend = 13
+        # 2019.06.08
+        self._administrative_fee_share = 14
 
         self._assessment_per_gallon = 0.0025
         self._gallons_per_cubic_foot = 7.4805
@@ -32,6 +34,10 @@ class Constants:
     @property
     def administrative_fee_received(self):
         return self._administrative_fee_received
+
+    @property
+    def administrative_fee_share(self):
+        return self._administrative_fee_share
 
     @property
     def payment_received(self):

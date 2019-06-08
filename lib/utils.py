@@ -4,9 +4,27 @@ from shutil import copyfile
 import fpdf
 from datetime import datetime
 import shutil
-from lib import constants
 
-constantTest = 999
+import logbook
+
+from lib import constants
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+logfile = datetime.now().strftime("%Y.%m.%d.log")
+file_handler = logging.FileHandler(logfile)
+
+formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
+
+def generate_logfile_name():
+    logger.debug(f"generate_logfile_name()")
+    return datetime.now().strftime("%Y.%m.%d.log")
 
 
 def get_acct_balance(acct, cur):
@@ -338,26 +356,29 @@ def backup_file(logger: object, fn: object) -> str:
     return new_filename
 
 
-def prompt_for_amount(logger, prompt):
-    logger.debug("entering get_amount()")
+def prompt_for_amount(prompt):
+    amount_logger = logbook.Logger('amount_logger')
+    amount_logger.trace("Entering get_amount()")
     while 1:
         try:
             amt = input(f"{prompt}: $")
-            logger.debug(f"get_amount() input is: {amt}")
-            logger.debug(f"amt: {amt}")
-            logger.debug(f"float(amt): {float(amt)}")
-            logger.debug(f"float(amt) * 100: {float(amt) * 100}")
-            logger.debug(f"round float(amt) * 100: {round(float(amt) * 100, 0)}")
+            amount_logger.trace(f"get_amount() input is: {amt}")
+            amount_logger.trace(f"amt: {amt}")
+            amount_logger.trace(f"float(amt): {float(amt)}")
+            amount_logger.trace(f"float(amt) * 100: {float(amt) * 100}")
+            amount_logger.trace(f"round float(amt) * 100: {round(float(amt) * 100, 0)}")
             amt = int(round(float(amt) * 100, 0))
-            logger.debug(f"get_amount() is going to return: {amt}")
+            amount_logger.trace(f"get_amount() is going to return: {amt}")
             return amt
         except ValueError as e:
-            logger.debug(e)
+            amount_logger.trace(e)
             print("Bad amount ... try again.")
 
 
-def prompt_for_current_date(logger, prompt):
-    logger.debug("entering prompt_for_current_date")
+def prompt_for_current_date(prompt):
+    date_logger = logbook.Logger('date_logger')
+    date_logger.notice('Entered prompt_for_current_date')
+    # logger.debug("entering prompt_for_current_date")
     while 1:
         try:
             reading_date = input(f"{prompt}: ")
@@ -369,17 +390,15 @@ def prompt_for_current_date(logger, prompt):
             print("Bad date ... try again.")
 
 
-def prompt_for_notes(logger, prompt):
-    logger.debug("entering prompt_for_notes")
-
-    input_str = ""
+def prompt_for_notes(prompt):
+    note_logger = logbook.Logger('note_logger')
+    note_logger.notice("entering prompt_for_notes")
+    notes = []
     while 1:
         response = input("{} [q to quit]: ".format(prompt))
-        if response == "q":
-            break
-        input_str += response
-    return input_str.strip()
-
+        if response == 'q':
+            return '|'.join(notes)
+        notes.append(response)
 
 def prompt_for_account(logger, prompt, cur) -> str:
     # get the account list

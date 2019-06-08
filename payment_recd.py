@@ -4,18 +4,6 @@ import sqlite3
 from lib import utils
 from lib import constants
 
-# Found this stray file .... moved into the utils file
-# def get_acct_balance(acct, cur):
-#     exec_str = f"""
-#         SELECT SUM(amount)
-#         FROM activity
-#         WHERE acct = (?)
-#     """
-#     params = (acct, )
-#     row = cur.execute(exec_str, params)
-#     bal = row.fetchone()[0]
-#     return bal / 100
-
 
 def main():
     db = "well.sqlite"
