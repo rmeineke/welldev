@@ -1,34 +1,19 @@
-import logging
-import sys
 import sqlite3
+
+import logbook
+
 from lib import utils
 from lib import constants
 
 
 def main():
+    payment_logger = logbook.Logger('payment_recd')
     db = "well.sqlite"
-
-    # set up for logging
-    LEVELS = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-        "error": logging.ERROR,
-        "critical": logging.CRITICAL,
-    }
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    logger = logging.getLogger()
-    logger.debug("payment_recd")
-    logger.debug("entering main")
 
     database = sqlite3.connect(f"{db}")
     cur = database.cursor()
 
-    acct = utils.prompt_for_account(logger, "Please choose an account", cur)
+    acct = utils.prompt_for_account("Please choose an account", cur)
     #
     # show the current balance here
     # fetch balance and display
@@ -37,26 +22,26 @@ def main():
         print(f"This account has a zero balance.")
         exit(0)
 
-    date = utils.prompt_for_current_date(logger, "Payment date")
+    date = utils.prompt_for_current_date("Payment date")
 
     # fetch amount and flip the sign
     print(f"Current balance: ${cur_balance:.2f}")
-    amt = utils.prompt_for_amount(logger, "Payment amount")
-    logger.debug(f"get_amount just returned this amount: {amt}")
+    amt = utils.prompt_for_amount("Payment amount")
+    payment_logger.debug(f"get_amount just returned this amount: {amt}")
     amt *= -1
 
     # cobble together the account note
     notes = "Payment on account ("
-    notes += utils.prompt_for_notes(logger, "Check number")
+    notes += utils.prompt_for_notes("Check number")
     notes += ")"
 
-    logger.debug(date)
-    logger.debug(amt)
-    logger.debug(acct)
-    logger.debug(notes)
+    payment_logger.debug(date)
+    payment_logger.debug(amt)
+    payment_logger.debug(acct)
+    payment_logger.debug(notes)
 
     # backup the file prior to adding any data
-    utils.backup_file(logger, db)
+    utils.backup_file(db)
 
     const = constants.Constants()
     # insert the account
@@ -76,4 +61,5 @@ def main():
 
 
 if __name__ == "__main__":
+    utils.init_logging('payment_recd.log')
     main()

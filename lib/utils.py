@@ -4,22 +4,22 @@ from shutil import copyfile
 import fpdf
 from datetime import datetime
 import shutil
-
+import sys
 import logbook
 
 from lib import constants
-import logging
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
-logfile = datetime.now().strftime("%Y.%m.%d.log")
-file_handler = logging.FileHandler(logfile)
+def init_logging(filename: object = None) -> object:
+    level = logbook.TRACE
+    if filename:
+        logbook.TimedRotatingFileHandler(filename, level=level).push_application()
+    else:
+        logbook.StreamHandler(sys.stdout, level=level).push_application()
+    msg = f"Logging initialized: level = {level}"
 
-formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
+    logger = logbook.Logger('Startup')
+    logger.notice(msg)
 
 
 def generate_logfile_name():
@@ -342,8 +342,10 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
     logger.debug(f"leaving generate_pdf")
 
 
-def backup_file(logger: object, fn: object) -> str:
-    logger.debug("entering backup_file")
+def backup_file(fn: object) -> str:
+    backup_file_logger = logbook.Logger('file_backup.log')
+    backup_file_logger.debug("entering backup_file")
+
     backup_directory = "./backups"
     if not os.path.exists(backup_directory):
         os.makedirs(backup_directory)
@@ -351,7 +353,7 @@ def backup_file(logger: object, fn: object) -> str:
     dt = datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
 
     new_filename = os.path.join(backup_directory, dt + "__" + fn)
-    logger.debug(f"backing up to: {new_filename}")
+    backup_file_logger.debug(f"backing up to: {new_filename}")
     copyfile(fn, new_filename)
     return new_filename
 
@@ -400,7 +402,8 @@ def prompt_for_notes(prompt):
             return '|'.join(notes)
         notes.append(response)
 
-def prompt_for_account(logger, prompt, cur) -> str:
+
+def prompt_for_account( prompt, cur) -> str:
     # get the account list
     cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
@@ -431,8 +434,10 @@ def get_savings_balance(logger, cur):
     return cur_balance
 
 
-def print_savings_account_balance(logger, cur):
-    logger.debug('Entering print_savings_account_balance()')
+def print_savings_account_balance(cur):
+    log = logbook.Logger('savings_balance')
+    log.notice('entering print_savings_account_balance')
+    # logger.debug('Entering print_savings_account_balance()')
     exec_str = f"""
             SELECT SUM(amount)
             FROM activity 
@@ -515,8 +520,8 @@ def print_savings_account_balance(logger, cur):
 #     print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
 
 
-def print_account_balances(logger, cur):
-    logger.debug('Entering get_account_balances')
+def print_account_balances(cur):
+    # logger.debug('Entering get_account_balances')
     # loop through and get acct ids
     # then get each balance and return
 
@@ -524,12 +529,12 @@ def print_account_balances(logger, cur):
         SELECT acct_id, last_name, active 
         FROM account
     """
-    logger.debug(f"{exec_str}")
+    # logger.debug(f"{exec_str}")
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
         if r['active'] == 'no':
-            logger.debug(f"account {r['acct_id']} is inactive")
+            # logger.debug(f"account {r['acct_id']} is inactive")
             continue
 
         exec_str = f"""

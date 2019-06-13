@@ -14,12 +14,12 @@ def main():
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
-    fee_date: str = utils.prompt_for_current_date("Fee date")
+    fee_date: str = utils.prompt_for_current_date("Date paid")
     fee_logger.trace(f'fee_date: {fee_date}')
-    fee_amount: int = utils.prompt_for_amount("Fee amount")
+    fee_amount: int = utils.prompt_for_amount("Amount")
+    # and make this amount negative to show as paid
+    fee_amount = fee_amount * -1
     fee_logger.trace(f'fee amount: {fee_amount}')
-    qtr_share: int = int(round(fee_amount/4))
-    fee_logger.trace(f'qtr_share (rounded): {qtr_share}')
     fee_note = utils.prompt_for_notes("Notes")
     fee_logger.trace(f'fee_note: {fee_note}')
 
@@ -29,22 +29,8 @@ def main():
                     INSERT INTO activity (date, type, amount, note)
                     VALUES (?, ?, ?, ?)
                 """
-    params = (fee_date, const.administrative_fee_received, fee_amount, fee_note)
+    params = (fee_date, const.administrative_fee_paid, fee_amount, fee_note)
     cur.execute(exec_str, params)
-
-    exec_str = "SELECT * FROM account"
-    cur.execute(exec_str)
-    rows = cur.fetchall()
-    for r in rows:
-        if r["active"] == "no":
-            fee_logger.trace(f"Account {r['acct_id']} currently INACTIVE")
-            continue
-        exec_str = f"""
-            INSERT INTO activity (date, acct, type, amount, note) 
-            VALUES (?,?,?,?,?)
-        """
-        params = (fee_date, r["acct_id"], const.administrative_fee_share, qtr_share, fee_note)
-        cur.execute(exec_str, params)
 
     # save, then close the cursor and db
     db.commit()
@@ -65,5 +51,5 @@ def init_logging(filename: str = None):
 
 
 if __name__ == '__main__':
-    init_logging('admin_fee.log')
+    init_logging('admin_fee_paid.log')
     main()
