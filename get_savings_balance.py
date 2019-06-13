@@ -5,8 +5,8 @@ from lib import utils
 
 
 def main():
-    savings_logger = logbook.Logger('get_savings_bal.log')
-    database = 'well.sqlite'
+    savings_logger = logbook.Logger("get_savings_bal.log")
+    database = "well.sqlite"
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
@@ -20,7 +20,11 @@ def main():
         OR type = (?)
     """
     const = constants.Constants()
-    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
+    params = (
+        const.savings_deposit_made,
+        const.savings_disbursement,
+        const.savings_dividend,
+    )
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
     savings_logger.trace(f"current_savings_balance: {current_savings_balance}")
@@ -33,6 +37,6 @@ def main():
     db.close()
 
 
-if __name__ == '__main__':
-    utils.init_logging('get_savings_bal.log')
+if __name__ == "__main__":
+    utils.init_logging("get_savings_bal.log")
     main()
