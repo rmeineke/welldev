@@ -1,49 +1,33 @@
-import logging
-import sys
 import sqlite3
 from lib import utils
+import logbook
 
 
 def main():
+    reading_logger = logbook.Logger('readings')
     database = "well.sqlite"
-
-    # set up for logging
-    LEVELS = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-        "error": logging.ERROR,
-        "critical": logging.CRITICAL,
-    }
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    logger = logging.getLogger()
-    logger.debug("Entering main")
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    reading_date: str = utils.prompt_for_current_date(logger, "Reading date")
+    reading_date: str = utils.prompt_for_current_date("Reading date")
     exec_str = "INSERT INTO reading_date (date) VALUES (?)"
     params = (reading_date,)
-    logger.debug(f"{exec_str}{params}")
+    reading_logger.trace(f"{exec_str}{params}")
     cur.execute(exec_str, params)
     last_inserted_row_id = cur.lastrowid
 
-    logger.debug("attempting to backup the database file now")
-    backup_file_name = utils.backup_file(logger, database)
-    logger.debug(f"database backed up to: {backup_file_name}")
+    reading_logger.trace("attempting to backup the database file now")
+    backup_file_name = utils.backup_file(database)
+    reading_logger.trace(f"database backed up to: {backup_file_name}")
 
     exec_str = "SELECT * FROM account"
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
         if r["active"] == "no":
-            logger.debug(f"Account {r['acct_id']} currently INACTIVE")
+            reading_logger.trace(f"Account {r['acct_id']} currently INACTIVE")
             continue
 
         # fetch last month's reading as a sanity check
@@ -80,4 +64,5 @@ def main():
 
 
 if __name__ == "__main__":
+    utils.init_logging('monthly_readings.log')
     main()
