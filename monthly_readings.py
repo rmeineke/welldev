@@ -4,7 +4,7 @@ import logbook
 
 
 def main():
-    reading_logger = logbook.Logger('readings')
+    reading_logger = logbook.Logger("readings")
     database = "well.sqlite"
 
     db = sqlite3.connect(database)
@@ -64,5 +64,5 @@ def main():
 
 
 if __name__ == "__main__":
-    utils.init_logging('monthly_readings.log')
+    utils.init_logging("monthly_readings.log")
     main()

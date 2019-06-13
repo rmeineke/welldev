@@ -1,26 +1,12 @@
-import logging
+import logbook
 import sqlite3
-import sys
-import constants
+from lib import constants
+from lib import utils
 
 
 def main():
+    savings_logger = logbook.Logger('get_savings_bal.log')
     database = 'well.sqlite'
-
-    # set up for logging
-    LEVELS = {'debug': logging.DEBUG,
-              'info': logging.INFO,
-              'warning': logging.WARNING,
-              'error': logging.ERROR,
-              'critical': logging.CRITICAL,
-              }
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    logger = logging.getLogger()
-    logger.debug('Entering main')
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
@@ -34,10 +20,10 @@ def main():
         OR type = (?)
     """
     const = constants.Constants()
-    params = (const.savings_deposit, const.savings_disbursement, const.savings_dividend)
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
-    logger.debug(f"current_savings_balance: {current_savings_balance}")
+    savings_logger.trace(f"current_savings_balance: {current_savings_balance}")
     print(f"===============================================")
     print(f" current savings balance: $ {current_savings_balance/100:,.2f}")
     print(f"===============================================")
@@ -48,4 +34,5 @@ def main():
 
 
 if __name__ == '__main__':
+    utils.init_logging('get_savings_bal.log')
     main()
