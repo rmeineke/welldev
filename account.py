@@ -85,22 +85,22 @@ class Account:
     @adjustments.setter
     def adjustments(self, value):
         self.__adjustments = value
-
-    @property
-    def latest_reading(self):
-        return self.__latest_reading
-
-    @latest_reading.setter
-    def latest_reading(self, value):
-        self.__latest_reading = value
-
-    @property
-    def previous_reading(self):
-        return self.__previous_reading
-
-    @previous_reading.setter
-    def previous_reading(self, value):
-        self.__previous_reading = value
+    #
+    # @property
+    # def latest_reading(self):
+    #     return self.__latest_reading
+    #
+    # @latest_reading.setter
+    # def latest_reading(self, value):
+    #     self.__latest_reading = value
+    #
+    # @property
+    # def previous_reading(self):
+    #     return self.__previous_reading
+    #
+    # @previous_reading.setter
+    # def previous_reading(self, value):
+    #     self.__previous_reading = value
 
     @property
     def current_usage_in_gallons(self):
