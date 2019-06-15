@@ -55,6 +55,7 @@ def main():
             VALUES (?, ?, ?)
         """
         params = (last_inserted_row_id, r["acct_id"], reading)
+        reading_logger.trace(params)
         cur.execute(exec_str, params)
 
     # save, then close the cursor and db
