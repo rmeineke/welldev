@@ -4,7 +4,7 @@ import logbook
 
 
 def main():
-    reading_logger = logbook.Logger("readings")
+    logger = logbook.Logger("readings")
     database = "well.sqlite"
 
     db = sqlite3.connect(database)
@@ -14,20 +14,20 @@ def main():
     reading_date: str = utils.prompt_for_current_date("Reading date")
     exec_str = "INSERT INTO reading_date (date) VALUES (?)"
     params = (reading_date,)
-    reading_logger.trace(f"{exec_str}{params}")
+    logger.trace(f"{exec_str}{params}")
     cur.execute(exec_str, params)
     last_inserted_row_id = cur.lastrowid
 
-    reading_logger.trace("attempting to backup the database file now")
+    logger.trace("attempting to backup the database file now")
     backup_file_name = utils.backup_file(database)
-    reading_logger.trace(f"database backed up to: {backup_file_name}")
+    logger.trace(f"database backed up to: {backup_file_name}")
 
     exec_str = "SELECT * FROM account"
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
         if r["active"] == "no":
-            reading_logger.trace(f"Account {r['acct_id']} currently INACTIVE")
+            logger.trace(f"Account {r['acct_id']} currently INACTIVE")
             continue
 
         # fetch last month's reading as a sanity check
@@ -55,7 +55,7 @@ def main():
             VALUES (?, ?, ?)
         """
         params = (last_inserted_row_id, r["acct_id"], reading)
-        reading_logger.trace(params)
+        logger.trace(params)
         cur.execute(exec_str, params)
 
     # save, then close the cursor and db
