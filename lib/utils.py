@@ -417,27 +417,26 @@ def prompt_for_account( prompt, cur) -> str:
         if int(acct) in acct_list:
             return acct
 
-
-def get_savings_balance(logger, cur):
-    logger.debug('Entering get_savings_balance()')
-    exec_str = f"""
-        SELECT SUM(amount)
-        FROM activity 
-        WHERE type = (?)
-        OR type = (?)
-        OR type = (?)
-    """
-    const = constants.Constants()
-    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
-    row = cur.execute(exec_str, params)
-    cur_balance = row.fetchone()[0]
-    return cur_balance
+#
+# def get_savings_balance(logger, cur):
+#     logger.debug('Entering get_savings_balance()')
+#     exec_str = f"""
+#         SELECT SUM(amount)
+#         FROM activity
+#         WHERE type = (?)
+#         OR type = (?)
+#         OR type = (?)
+#     """
+#     const = constants.Constants()
+#     params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
+#     row = cur.execute(exec_str, params)
+#     cur_balance = row.fetchone()[0]
+#     return cur_balance
 
 
 def print_savings_account_balance(cur):
     log = logbook.Logger('savings_balance')
     log.notice('entering print_savings_account_balance')
-    # logger.debug('Entering print_savings_account_balance()')
     exec_str = f"""
             SELECT SUM(amount)
             FROM activity 
@@ -448,7 +447,9 @@ def print_savings_account_balance(cur):
     const = constants.Constants()
     params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     row = cur.execute(exec_str, params)
-    print(f"savings account balance: {(row.fetchone()[0] / 100):9.2f}")
+    value = row.fetchone()[0]
+    log.trace(f"value: {value}")
+    print(f"savings account balance: {(value / 100):9.2f}")
 
 #
 # def print_main_account_balance(logger, cur):
@@ -524,7 +525,8 @@ def print_account_balances(cur):
     # logger.debug('Entering get_account_balances')
     # loop through and get acct ids
     # then get each balance and return
-
+    log = logbook.Logger('print_account_balances')
+    log.trace(f'entering print_account_balances()')
     exec_str = f"""
         SELECT acct_id, last_name, active 
         FROM account

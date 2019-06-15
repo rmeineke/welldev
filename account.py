@@ -62,7 +62,7 @@ class Account:
     def current_balance(self, value):
         self.__current_balance = value
 
-    @property   
+    @property
     def prev_balance(self):
         return self.__prev_balance
 
@@ -115,10 +115,12 @@ class Account:
         self.pge_bill_share = round((pge_bill * self.current_usage_percent) / 10000, 2)
 
     def calculate_current_usage_percent(self, ttl_monthly_usage):
-        self.current_usage_percent = round((self.current_usage / ttl_monthly_usage) * 100, 2)
+        self.current_usage_percent = round(
+            (self.current_usage / ttl_monthly_usage) * 100, 2
+        )
 
     def calculate_current_usage(self):
         self.current_usage = self.latest_reading - self.previous_reading
-        if self.reads_in == 'cubic feet':
+        if self.reads_in == "cubic feet":
             self.current_usage = self.current_usage * 7.4805
         self.current_usage = round(self.current_usage, 2)
