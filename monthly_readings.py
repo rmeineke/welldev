@@ -65,5 +65,5 @@ def main():
 
 
 if __name__ == "__main__":
-    utils.init_logging("monthly_readings.log")
+    utils.init_logging("logs/monthly_readings.log")
     main()

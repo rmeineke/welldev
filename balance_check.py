@@ -21,5 +21,5 @@ def main():
 
 
 if __name__ == '__main__':
-    utils.init_logging('balance_check.log')
+    utils.init_logging('logs/balance_check.log')
     main()

@@ -38,5 +38,5 @@ def main():
 
 
 if __name__ == "__main__":
-    utils.init_logging("get_savings_bal.log")
+    utils.init_logging("logs/get_savings_bal.log")
     main()

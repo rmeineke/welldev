@@ -36,5 +36,5 @@ def main():
 
 
 if __name__ == '__main__':
-    utils.init_logging('pge_bill_paid.log')
+    utils.init_logging('logs/pge_bill_paid.log')
     main()
