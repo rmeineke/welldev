@@ -417,21 +417,21 @@ def prompt_for_account( prompt, cur) -> str:
         if int(acct) in acct_list:
             return acct
 
-#
-# def get_savings_balance(logger, cur):
-#     logger.debug('Entering get_savings_balance()')
-#     exec_str = f"""
-#         SELECT SUM(amount)
-#         FROM activity
-#         WHERE type = (?)
-#         OR type = (?)
-#         OR type = (?)
-#     """
-#     const = constants.Constants()
-#     params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
-#     row = cur.execute(exec_str, params)
-#     cur_balance = row.fetchone()[0]
-#     return cur_balance
+
+def get_savings_balance(logger, cur):
+    logger.debug('Entering get_savings_balance()')
+    exec_str = f"""
+        SELECT SUM(amount)
+        FROM activity
+        WHERE type = (?)
+        OR type = (?)
+        OR type = (?)
+    """
+    const = constants.Constants()
+    params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
+    row = cur.execute(exec_str, params)
+    cur_balance = row.fetchone()[0]
+    return cur_balance
 
 
 def print_savings_account_balance(cur):
