@@ -85,6 +85,7 @@ class Account:
     @adjustments.setter
     def adjustments(self, value):
         self.__adjustments = value
+
     #
     # @property
     # def latest_reading(self):
