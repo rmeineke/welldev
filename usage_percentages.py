@@ -1,5 +1,4 @@
-import logging
-import sys
+import logbook
 import sqlite3
 import account
 from lib import utils
@@ -8,21 +7,7 @@ from lib import utils
 def main():
     database = "well.sqlite"
 
-    # set up for logging
-    LEVELS = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-        "error": logging.ERROR,
-        "critical": logging.CRITICAL,
-    }
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    logger = logging.getLogger()
-    logger.debug("Entering main")
+    logger = logbook.Logger("percentages")
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
@@ -50,33 +35,31 @@ def main():
 
         # fetch the last two reading rows from the db
         acct_id = r["acct_id"]
-        rows = utils.fetch_last_two_reading(cur, acct_id, logger)
-
+        rows = utils.fetch_last_two_reading(cur, acct_id)
         # need to collect them both in a list for further processing
         readings_list = []
         for row in rows:
             readings_list.append(row["reading"])
-
-        logger.debug(f"reads in: {acct_obj.reads_in}")
-        logger.debug(f"readings_list: {readings_list}")
+        logger.trace(f"reads in: {acct_obj.reads_in}")
+        logger.trace(f"readings_list: {readings_list}")
         acct_obj.latest_reading = readings_list[0]
         acct_obj.previous_reading = readings_list[1]
 
         acct_obj.calculate_current_usage()
-        logger.debug(f"current usage: {acct_obj.current_usage}")
+        logger.trace(f"current usage: {acct_obj.current_usage}")
 
         total_usage += acct_obj.current_usage
-    logger.debug(f"total usage: {total_usage:.2f}")
+    logger.trace(f"total usage: {total_usage:.2f}")
     total_usage = round(total_usage, 2)
-    logger.debug(f"total usage, rounded: {total_usage:.2f}")
+    logger.trace(f"total usage, rounded: {total_usage:.2f}")
     percents_total = 0
     for a in acct_list:
         a.current_usage_percent = round(a.current_usage / total_usage * 100, 2)
         print(f"{a.ln:20}...  {a.current_usage_percent:8.2f}%")
-        logger.debug(f"{a.current_usage / total_usage * 100}")
+        logger.trace(f"{a.current_usage / total_usage * 100}")
         percents_total += a.current_usage_percent
 
-    print(f"\n{'percents_total:':19} ... {percents_total:9.2f}%\n")
+    logger.trace(f"\n{'percents_total:':19} ... {percents_total:9.2f}%\n")
 
     # close the cursor and db
     cur.close()
@@ -84,4 +67,5 @@ def main():
 
 
 if __name__ == "__main__":
+    utils.init_logging("logs/percentages.log")
     main()
