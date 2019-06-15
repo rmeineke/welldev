@@ -10,7 +10,7 @@ import logbook
 from lib import constants
 
 
-def init_logging(filename: object = None) -> object:
+def init_logging(filename: object = None):
     level = logbook.TRACE
     if filename:
         logbook.TimedRotatingFileHandler(filename, level=level).push_application()
@@ -23,7 +23,8 @@ def init_logging(filename: object = None) -> object:
 
 
 def generate_logfile_name():
-    logger.debug(f"generate_logfile_name()")
+    logger = logbook.Logger('generate_logfile_name')
+    logger.trace(f"generate_logfile_name()")
     return datetime.now().strftime("%Y.%m.%d.log")
 
 
@@ -37,7 +38,7 @@ def get_acct_balance(acct, cur):
     row = cur.execute(exec_str, params)
     bal = row.fetchone()[0]
     if bal is None:
-        return 0;
+        return 0
     else:
         return bal / 100
 
@@ -47,18 +48,8 @@ def make_date_readable(d):
     return datetime.strftime(date_obj, "%m-%d-%Y")
 
 
-def get_last_pge_bill_recd_amount(cur, logger):
+def get_last_pge_bill_recd_amount(cur):
     const = constants.Constants()
-    # exec_str: str = f"""
-    #     SELECT amount
-    #     FROM activity
-    #     where type = ?
-    #     ORDER BY amount
-    #     ASC
-    #     LIMIT 1
-    # """
-    # ooops, needed to sort by the date ... not the amount
-    # this should take care of it...
     exec_str: str = f"""
         SELECT amount 
         FROM activity
@@ -92,8 +83,9 @@ def generate_unique_pdf_filename(stub):
             return fn
 
 
-def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, logger):
-    logger.debug(f"entering generate_pdf")
+def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
+    logger = logbook.Logger('generate_pdf')
+    logger.trace(f"entering generate_pdf")
 
     # let's get a few things set up here ...
     dt = datetime.now().strftime("%Y.%m.%d")
@@ -339,12 +331,12 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list, log
     pdf.output(output_file, 'F')
     backup_filename = f"backups/{output_file}"
     shutil.copyfile(output_file, backup_filename)
-    logger.debug(f"leaving generate_pdf")
+    logger.trace(f"leaving generate_pdf")
 
 
-def backup_file(fn: object) -> str:
+def backup_file(fn: str) -> str:
     backup_file_logger = logbook.Logger('file_backup.log')
-    backup_file_logger.debug("entering backup_file")
+    backup_file_logger.trace("entering backup_file")
 
     backup_directory = "./backups"
     if not os.path.exists(backup_directory):
@@ -353,7 +345,7 @@ def backup_file(fn: object) -> str:
     dt = datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
 
     new_filename = os.path.join(backup_directory, dt + "__" + fn)
-    backup_file_logger.debug(f"backing up to: {new_filename}")
+    backup_file_logger.trace(f"backing up to: {new_filename}")
     copyfile(fn, new_filename)
     return new_filename
 
@@ -380,7 +372,6 @@ def prompt_for_amount(prompt):
 def prompt_for_current_date(prompt):
     date_logger = logbook.Logger('date_logger')
     date_logger.notice('Entered prompt_for_current_date')
-    # logger.debug("entering prompt_for_current_date")
     while 1:
         try:
             reading_date = input(f"{prompt}: ")
@@ -418,8 +409,9 @@ def prompt_for_account( prompt, cur) -> str:
             return acct
 
 
-def get_savings_balance(logger, cur):
-    logger.debug('Entering get_savings_balance()')
+def get_savings_balance(cur):
+    logger = logbook.Logger('get_savings_balance')
+    logger.trace('Entering get_savings_balance()')
     exec_str = f"""
         SELECT SUM(amount)
         FROM activity
@@ -435,8 +427,8 @@ def get_savings_balance(logger, cur):
 
 
 def print_savings_account_balance(cur):
-    log = logbook.Logger('savings_balance')
-    log.notice('entering print_savings_account_balance')
+    logger = logbook.Logger('savings_balance')
+    logger.notice('entering print_savings_account_balance')
     exec_str = f"""
             SELECT SUM(amount)
             FROM activity 
@@ -448,7 +440,7 @@ def print_savings_account_balance(cur):
     params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
     row = cur.execute(exec_str, params)
     value = row.fetchone()[0]
-    log.trace(f"value: {value}")
+    logger.trace(f"value: {value}")
     print(f"savings account balance: {(value / 100):9.2f}")
 
 #
@@ -522,7 +514,6 @@ def print_savings_account_balance(cur):
 
 
 def print_account_balances(cur):
-    # logger.debug('Entering get_account_balances')
     # loop through and get acct ids
     # then get each balance and return
     log = logbook.Logger('print_account_balances')
@@ -531,7 +522,6 @@ def print_account_balances(cur):
         SELECT acct_id, last_name, active 
         FROM account
     """
-    # logger.debug(f"{exec_str}")
     cur.execute(exec_str)
     rows = cur.fetchall()
     for r in rows:
@@ -552,7 +542,7 @@ def print_account_balances(cur):
         print(f'{r["acct_id"]} -- {r["last_name"]:10} ....... {(bal / 100):>10,.2f}')
 
 
-def fetch_last_two_reading(cur, acct_id, logger):
+def fetch_last_two_reading(cur, acct_id):
     exec_str = f"""
         SELECT reading
         FROM reading
@@ -566,8 +556,9 @@ def fetch_last_two_reading(cur, acct_id, logger):
     return rows
 
 
-def get_last_pge_bill_recd_date(cur, logger):
-    logger.debug(f"entering get_last_pge_bill_recd_date")
+def get_last_pge_bill_recd_date(cur):
+    logger = logbook.Logger('get_last_pge_bill_recd_date')
+    logger.trace(f"entering get_last_pge_bill_recd_date")
     const = constants.Constants()
 
     exec_str = f"""
@@ -583,7 +574,8 @@ def get_last_pge_bill_recd_date(cur, logger):
     return row['date']
 
 
-def get_last_two_reading_dates(cur, logger):
+def get_last_two_reading_dates(cur):
+    logger = logbook.Logger('get_last_two_reading_dates')
     logger.debug(f"entering get_last_two_reading_dates")
     exec_str = f"""
         SELECT date
@@ -610,7 +602,6 @@ def get_prev_balance(cur, acct_id, date, logger):
         AND date < ?
     """
     params = (acct_id, date)
-    # logger.debug(f"{exec_str}")
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 
@@ -630,7 +621,7 @@ def get_new_charges(cur, acct_id, date, logger):
     return row.fetchone()[0]
 
 
-def get_adjustments(cur, acct_id, date, logger):
+def get_adjustments(cur, acct_id, date):
     const = constants.Constants()
     exec_str = f"""
             SELECT SUM(amount)
@@ -644,9 +635,8 @@ def get_adjustments(cur, acct_id, date, logger):
     return row.fetchone()[0]
 
 
-def get_payments(cur, acct_id, date, logger):
+def get_payments(cur, acct_id, date):
     const = constants.Constants()
-
     exec_str = f"""
         SELECT SUM(amount)
         FROM activity
@@ -655,14 +645,14 @@ def get_payments(cur, acct_id, date, logger):
         AND date >= ?
     """
     params = (acct_id, const.payment_received, date)
-    # logger.debug(f"{exec_str}")
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 
 
-def get_pge_share(cur, acct_id, date, logger):
+def get_pge_share(cur, acct_id, date):
+    logger = logbook.Logger('get_pge_share')
     const = constants.Constants()
-    logger.debug(f"{acct_id} -- {date}")
+    logger.trace(f"{acct_id} -- {date}")
     exec_str = f"""
         SELECT amount
         FROM activity
@@ -672,12 +662,11 @@ def get_pge_share(cur, acct_id, date, logger):
     """
     params = (acct_id, const.pge_bill_share, date)
     row = cur.execute(exec_str, params)
-    # logger.debug(f"{row}")
     return row.fetchone()[0]
 
 
-def set_last_two_readings(cur, acct_obj, logger):
-    # select reading from reading where account_id = 4 order by reading desc limit 2;
+def set_last_two_readings(cur, acct_obj):
+    logger = logbook.Logger('set_last_two_readings')
     exec_str = f"""
                 SELECT reading
                 FROM reading
@@ -690,19 +679,20 @@ def set_last_two_readings(cur, acct_obj, logger):
     rows = cur.execute(exec_str, params)
     readings = []
     for row in rows:
-        logger.debug(f"reading: {row['reading']}")
+        logger.trace(f"reading: {row['reading']}")
         readings.append(row['reading'])
-    logger.debug(readings)
+    logger.trace(readings)
     acct_obj.latest_reading = readings[0]
     acct_obj.previous_reading = readings[1]
     pass
 
 
-def set_current_usage(acct_obj, logger):
+def set_current_usage(acct_obj):
+    logger = logbook.Logger('set_current_usage')
     const = constants.Constants()
     usage = acct_obj.latest_reading - acct_obj.previous_reading
-    logger.debug(f"raw usage: {usage} -- {acct_obj.reads_in}")
+    logger.trace(f"raw usage: {usage} -- {acct_obj.reads_in}")
     if acct_obj.reads_in == 'cubic feet':
         usage = round((usage * const.gallons_per_cubic_foot), 2)
-    logger.debug(f"CONVERTED usage: {usage:.2f}")
+    logger.trace(f"CONVERTED usage: {usage:.2f}")
     acct_obj.current_usage = usage
