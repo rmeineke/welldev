@@ -45,8 +45,8 @@ def get_acct_balance(acct, cur):
 
 def make_date_readable(d):
     date_obj = datetime.strptime(d, "%Y-%m-%d")
-    # return datetime.strftime(date_obj, "%m-%d-%Y")
-    date_obj.strftime("%m-%d-%Y")
+    return date_obj.strftime("%m-%d-%Y")
+
 
 def get_last_pge_bill_recd_amount(cur):
     const = constants.Constants()
@@ -201,7 +201,8 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         pdf.cell(col_width, 0, f"{acct_obj.latest_reading - acct_obj.previous_reading}", align="R")
         pdf.ln(lh)
         pdf.cell(col_width, 0,
-                 f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x " + f"{const.gallons_per_cubic_foot})")
+                 f"Usage (gallons = {acct_obj.latest_reading - acct_obj.previous_reading} x "
+                 + f"{const.gallons_per_cubic_foot})")
         pdf.cell(col_width, 0, f"{acct_obj.current_usage:.2f}", align="R")
         pdf.ln(lh)
     else:
@@ -224,15 +225,22 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.ln(lh)
     share = ((monthly_global_variables['last_pge_bill_recd_amount']) * pct) / 10000
     share = round(share, 2)
-    pdf.cell(col_width, 0, f"Your share of PGE bill ($ {monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})")
+    pdf.cell(
+        col_width,
+        0,
+        f"Your share of PGE bill ($ {monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})"
+    )
     pdf.cell(col_width, 0, f"   ${share:.2f}", align="R")
 
     if monthly_global_variables['assessment_needed']:
         pdf.ln(lh)
         pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
         pdf.ln(lh)
-        pdf.cell(col_width * 2, 0,
-                 f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)")
+        pdf.cell(
+            col_width * 2,
+            0,
+            f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)"
+        )
         pdf.cell(col_width, 0, f" ${acct_obj.current_usage * const.assessment_per_gallon:.2f}", align="R")
 
     # #######################################################
@@ -304,7 +312,8 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     # bal = get_savings_balance(logger, cur)
     # bal = bal / 100
     pdf.ln(lh)
-    pdf.cell(0, 0, f"Current savings account balance: $ {monthly_global_variables['current_savings_balance'] / 100:.2f}")
+    pdf.cell(0, 0,
+             f"Current savings account balance: $ {monthly_global_variables['current_savings_balance'] / 100:.2f}")
 
     # #######################################################
     # FOOTERS Section
@@ -378,7 +387,6 @@ def prompt_for_current_date(prompt):
             # ................................................ 01/24/2019
             date_obj = datetime.strptime(reading_date, "%m/%d/%Y")
             # ......................................... 2019-01-24
-            # return datetime.strftime(date_obj, "%Y-%m-%d")
             return date_obj.strftime("%Y-%m-%d")
         except ValueError:
             print("Bad date ... try again.")
@@ -395,7 +403,7 @@ def prompt_for_notes(prompt):
         notes.append(response)
 
 
-def prompt_for_account( prompt, cur) -> str:
+def prompt_for_account(prompt, cur) -> str:
     # get the account list
     cur.execute("SELECT * FROM account")
     rows = cur.fetchall()
@@ -593,7 +601,7 @@ def get_last_two_reading_dates(cur):
     return dates
 
 
-def get_prev_balance(cur, acct_id, date, logger):
+def get_prev_balance(cur, acct_id, date):
     """this needs altering to use the date of the last
     pge bill recd"""
     exec_str = f"""
@@ -607,7 +615,7 @@ def get_prev_balance(cur, acct_id, date, logger):
     return row.fetchone()[0]
 
 
-def get_new_charges(cur, acct_id, date, logger):
+def get_new_charges(cur, acct_id, date):
     const = constants.Constants()
 
     exec_str = f"""
