@@ -45,8 +45,8 @@ def get_acct_balance(acct, cur):
 
 def make_date_readable(d):
     date_obj = datetime.strptime(d, "%Y-%m-%d")
-    return datetime.strftime(date_obj, "%m-%d-%Y")
-
+    # return datetime.strftime(date_obj, "%m-%d-%Y")
+    date_obj.strftime("%m-%d-%Y")
 
 def get_last_pge_bill_recd_amount(cur):
     const = constants.Constants()
@@ -378,7 +378,8 @@ def prompt_for_current_date(prompt):
             # ................................................ 01/24/2019
             date_obj = datetime.strptime(reading_date, "%m/%d/%Y")
             # ......................................... 2019-01-24
-            return datetime.strftime(date_obj, "%Y-%m-%d")
+            # return datetime.strftime(date_obj, "%Y-%m-%d")
+            return date_obj.strftime("%Y-%m-%d")
         except ValueError:
             print("Bad date ... try again.")
 
@@ -510,7 +511,7 @@ def print_savings_account_balance(cur):
 #
 #     row = cur.execute(exec_str)
 #     cur_balance = row.fetchone()[0]
-#     print(f'\nmaster account balance: {cur_balance / 100:10.2f}')
+#     print(f"\n master account balance: {cur_balance / 100:10.2f}")
 
 
 def print_account_balances(cur):
