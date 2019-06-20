@@ -18,7 +18,7 @@ def main():
     cur.execute(exec_str, params)
     last_inserted_row_id = cur.lastrowid
 
-    logger.trace("attempting to backup the database file now")
+    logger.trace(f"attempting to backup the database file now")
     backup_file_name = utils.backup_file(database)
     logger.trace(f"database backed up to: {backup_file_name}")
 

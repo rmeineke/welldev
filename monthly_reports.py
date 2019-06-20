@@ -53,14 +53,13 @@ def main():
             SELECT *
             FROM activity
             WHERE (type = ? OR type = ? OR type = ?)
-            AND
-            (date >= ?)
+            AND (date >= ?)
         """
     params = (
         const.savings_deposit_made,
         const.savings_dividend,
         const.savings_disbursement,
-        dates[1],
+        dates[1]
     )
     logger.trace(params)
     rows = cur.execute(exec_str, params)
@@ -102,51 +101,43 @@ def main():
             r["file_alias"],
             r["address"],
             r["reads_in"],
-            ["master"],
+            r["master"]
         )
         acct_list.append(acct_obj)
 
         # set readings
-        utils.set_last_two_readings(cur, acct_obj, logger)
+        utils.set_last_two_readings(cur, acct_obj)
 
         # set current usage
-        utils.set_current_usage(acct_obj, logger)
+        utils.set_current_usage(acct_obj)
 
         # calculate total usage for the community
         # ttl_monthly_usage = ttl_monthly_usage + acct_obj.current_usage
         monthly_global_variables["ttl_monthly_usage"] += acct_obj.current_usage
 
         # get and set the previous balance
-        prev_balance = utils.get_prev_balance(
-            cur, acct_obj.acct_id, last_pge_bill_recd_date, logger
-        )
+        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, last_pge_bill_recd_date)
         if prev_balance is None:
             prev_balance = 0
         acct_obj.prev_balance = prev_balance
         logger.trace(f"prev_balance: {prev_balance}")
 
         # adjustments?
-        adjustments = utils.get_adjustments(
-            cur, acct_obj.acct_id, last_pge_bill_recd_date, logger
-        )
+        adjustments = utils.get_adjustments(cur, acct_obj.acct_id, last_pge_bill_recd_date)
         if adjustments is None:
             adjustments = 0
         acct_obj.adjustments = adjustments
         logger.trace(f"adjustments: {adjustments}")
 
         # fetch pge bill share
-        pge_bill_share = utils.get_pge_share(
-            cur, acct_obj.acct_id, last_pge_bill_recd_date, logger
-        )
+        pge_bill_share = utils.get_pge_share(cur, acct_obj.acct_id, last_pge_bill_recd_date)
         if pge_bill_share is None:
             pge_bill_share = 0
         acct_obj.pge_bill_share = pge_bill_share
         logger.trace(f"pge_bill_share: {pge_bill_share}")
 
         # check for any payments made
-        payments = utils.get_payments(
-            cur, acct_obj.acct_id, last_pge_bill_recd_date, logger
-        )
+        payments = utils.get_payments(cur, acct_obj.acct_id, last_pge_bill_recd_date)
         if payments is None:
             payments = 0
         acct_obj.payments = payments
@@ -154,9 +145,7 @@ def main():
 
         # this is just new pge shares and assessments ...
         # new charges
-        new_charges = utils.get_new_charges(
-            cur, acct_obj.acct_id, last_pge_bill_recd_date, logger
-        )
+        new_charges = utils.get_new_charges(cur, acct_obj.acct_id, last_pge_bill_recd_date)
         if new_charges is None:
             new_charges = 0
         acct_obj.new_charges = new_charges

@@ -112,7 +112,6 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     # #######################################################
     # ACCOUNT OVERVIEW Section
     # #######################################################
-    # headers
     epw = pdf.w - (2 * pdf.l_margin)
     col_width = epw / 5
     pdf.set_fill_color(220, 220, 220)
@@ -129,6 +128,8 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
 
     value = acct_obj.prev_balance
     if value < 0:
+        # turns this: $-6.95
+        # into this: -$6.95
         value = value * -1
         pdf.cell(col_width, lh, f"-${value / 100:.2f}", border="LBR", align="C")
     else:
@@ -141,11 +142,6 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     else:
         pdf.cell(col_width, lh, f"${value / 100:.2f}", border="LBR", align="C")
 
-    # this is the make the display a little nicer
-    # change this: $-6.93
-    # to
-    # this: -$6.93
-    # TODO: this needs to be done for all values ...
     value = acct_obj.adjustments
     if value < 0:
         value = value * -1
@@ -262,7 +258,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.cell(
         col_width,
         0,
-        f"Your share of PGE bill ($ {monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})",
+        f"Your share of PGE bill (${monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})",
     )
     pdf.cell(col_width, 0, f"   ${share:.2f}", align="R")
 
@@ -273,7 +269,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         pdf.cell(
             col_width * 2,
             0,
-            f"Savings assessment ({acct_obj.current_usage:.2f} gallons x $ {const.assessment_per_gallon} per gallon)",
+            f"Savings assessment ({acct_obj.current_usage:.2f} gallons x ${const.assessment_per_gallon} per gallon)",
         )
         pdf.cell(
             col_width,
@@ -314,15 +310,26 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         notes = row["note"].split("|")
         number_of_notes = len(notes)
         # TODO: there is some repeated code here ... see if you can suss this out
-        if number_of_notes == 1:
-            pdf.cell(col_width * 2, 0, f"{row['note']}")
-            pdf.cell(col_width, 0, f"$ {row['amount'] / 100:.2f}", align="R")
-            pdf.ln(lh + 2)
-        else:
-            pdf.cell(col_width * 2, 0, f"{notes[0]}")
-            pdf.cell(col_width, 0, f"$ {row['amount'] / 100:.2f}", align="R")
-            pdf.ln(lh + 2)
+        # if number_of_notes == 1:
+        #     # pdf.cell(col_width * 2, 0, f"{row['note']}")
+        #     pdf.cell(col_width * 2, 0, f"{notes[0]}")
+        #     pdf.cell(col_width, 0, f"${row['amount'] / 100:.2f}", align="R")
+        #     pdf.ln(lh + 2)
+        # else:
+        #     pdf.cell(col_width * 2, 0, f"{notes[0]}")
+        #     pdf.cell(col_width, 0, f"${row['amount'] / 100:.2f}", align="R")
+        #     pdf.ln(lh + 2)
+        #
+        #     for i in range(1, number_of_notes):
+        #         pdf.cell(col_width, 0, " ")
+        #         pdf.cell(col_width * 2, 0, f"{notes[i]}")
+        #         pdf.ln(lh + 2)
 
+        # TODO: this is to replace the above .... test on 6/20
+        pdf.cell(col_width * 2, 0, f"{notes[0]}")
+        pdf.cell(col_width, 0, f"${row['amount'] / 100:.2f}", align="R")
+        pdf.ln(lh + 2)
+        if number_of_notes > 1:
             for i in range(1, number_of_notes):
                 pdf.cell(col_width, 0, " ")
                 pdf.cell(col_width * 2, 0, f"{notes[i]}")
@@ -345,7 +352,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         pdf.cell(col_width, 0, f"{make_date_readable(item[1])}")
         pdf.cell(col_width * 1.5, 0, f"{item[0]}")
         pdf.cell(col_width * 1.5, 0, f"{item[3]}")
-        pdf.cell(col_width, 0, f"$ {item[2]}", align="R")
+        pdf.cell(col_width, 0, f"${item[2]}", align="R")
         pdf.ln(lh + 2)
 
     # bal = get_savings_balance(logger, cur)
@@ -354,7 +361,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.cell(
         0,
         0,
-        f"Current savings account balance: $ {monthly_global_variables['current_savings_balance'] / 100:.2f}",
+        f"Current savings account balance: ${monthly_global_variables['current_savings_balance'] / 100:.2f}",
     )
 
     # #######################################################
