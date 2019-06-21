@@ -21,11 +21,12 @@ def main():
     cur = db.cursor()
 
     last_pge_bill_recd_date = utils.get_last_pge_bill_recd_date(cur)
-    last_pge_bill_recd_amount = utils.get_last_pge_bill_recd_amount(cur)
-    monthly_global_variables["last_pge_bill_recd_amount"] = last_pge_bill_recd_amount
-    logger.trace(f"last_pge_bill_recd_amount: {last_pge_bill_recd_amount}")
-    monthly_global_variables["last_pge_bill_recd_date"] = last_pge_bill_recd_date
     logger.trace(f"last_pge_bill_recd_date: {last_pge_bill_recd_date}")
+    monthly_global_variables["last_pge_bill_recd_date"] = last_pge_bill_recd_date
+
+    last_pge_bill_recd_amount = utils.get_last_pge_bill_recd_amount(cur)
+    logger.trace(f"last_pge_bill_recd_amount: {last_pge_bill_recd_amount}")
+    monthly_global_variables["last_pge_bill_recd_amount"] = last_pge_bill_recd_amount
 
     monthly_global_variables["ttl_monthly_usage"] = 0.0
 
@@ -38,6 +39,7 @@ def main():
     else:
         monthly_global_variables["assessment_needed"] = False
 
+    # collect relevant dates
     dates = utils.get_last_two_reading_dates(cur)
     start_date = dates[1]
     monthly_global_variables["start_date"] = start_date
@@ -47,26 +49,27 @@ def main():
     monthly_global_variables["readable_start_date"] = readable_start_date
     readable_end_date = utils.make_date_readable(end_date)
     monthly_global_variables["readable_end_date"] = readable_end_date
+
     monthly_global_variables["current_savings_balance"] = utils.get_savings_balance(cur)
     const = constants.Constants()
     exec_str = f"""
             SELECT *
             FROM activity
             WHERE (type = ? OR type = ? OR type = ?)
-            AND (date >= ?)
+            AND (date > ?)
         """
     params = (
         const.savings_deposit_made,
         const.savings_dividend,
         const.savings_disbursement,
-        dates[1]
+        monthly_global_variables["start_date"]
     )
     logger.trace(params)
     rows = cur.execute(exec_str, params)
     savings_data_list = []
     for row in rows:
         logger.trace(
-            f".................... {row['type']} - {row['date']} - {row['amount']} - {row['note']}"
+            f"{row['type']} - {row['date']} - {row['amount']} - {row['note']}"
         )
         data_list = []
         if row["type"] == const.savings_deposit_made:
@@ -116,7 +119,7 @@ def main():
         monthly_global_variables["ttl_monthly_usage"] += acct_obj.current_usage
 
         # get and set the previous balance
-        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, last_pge_bill_recd_date)
+        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
         if prev_balance is None:
             prev_balance = 0
         acct_obj.prev_balance = prev_balance
@@ -137,15 +140,17 @@ def main():
         logger.trace(f"pge_bill_share: {pge_bill_share}")
 
         # check for any payments made
-        payments = utils.get_payments(cur, acct_obj.acct_id, last_pge_bill_recd_date)
+        payments = utils.get_payments(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
         if payments is None:
             payments = 0
         acct_obj.payments = payments
+        logger.trace(f"==========================================")
         logger.trace(f"payments: {payments}")
+        logger.trace(f"==========================================")
 
-        # this is just new pge shares and assessments ...
+        # this is just new pge shares and assessments and new fees...
         # new charges
-        new_charges = utils.get_new_charges(cur, acct_obj.acct_id, last_pge_bill_recd_date)
+        new_charges = utils.get_new_charges(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
         if new_charges is None:
             new_charges = 0
         acct_obj.new_charges = new_charges

@@ -248,7 +248,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.cell(
         col_width,
         0,
-        f"${monthly_global_variables['last_pge_bill_recd_amount'] / 100}",
+        f"${monthly_global_variables['last_pge_bill_recd_amount'] / 100:.2f}",
         align="R",
     )
     pct = round(current_usage_percent, 2)
@@ -258,7 +258,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.cell(
         col_width,
         0,
-        f"Your share of PGE bill (${monthly_global_variables['last_pge_bill_recd_amount'] / 100} x {pct / 100:0.4f})",
+        f"Your share of PGE bill (${monthly_global_variables['last_pge_bill_recd_amount'] / 100:.2f} x {pct / 100:0.4f})",
     )
     pdf.cell(col_width, 0, f"   ${share:.2f}", align="R")
 
@@ -327,7 +327,15 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
 
         # TODO: this is to replace the above .... test on 6/20
         pdf.cell(col_width * 2, 0, f"{notes[0]}")
-        pdf.cell(col_width, 0, f"${row['amount'] / 100:.2f}", align="R")
+        value = row['amount'] / 100
+        # if line_item amount is negative .... put the minus sign outside the
+        # $ sign .... -$6.93
+        if value < 0:
+            value = value * -1
+            pdf.cell(col_width, 0, f"-${value:.2f}", align="R")
+
+        else:
+            pdf.cell(col_width, 0, f"${value:.2f}", align="R")
         pdf.ln(lh + 2)
         if number_of_notes > 1:
             for i in range(1, number_of_notes):
@@ -352,7 +360,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         pdf.cell(col_width, 0, f"{make_date_readable(item[1])}")
         pdf.cell(col_width * 1.5, 0, f"{item[0]}")
         pdf.cell(col_width * 1.5, 0, f"{item[3]}")
-        pdf.cell(col_width, 0, f"${item[2]}", align="R")
+        pdf.cell(col_width, 0, f"${item[2]:.2f}", align="R")
         pdf.ln(lh + 2)
 
     # bal = get_savings_balance(logger, cur)
@@ -660,6 +668,8 @@ def get_last_two_reading_dates(cur):
 
 
 def get_prev_balance(cur, acct_id, date):
+    logger = logbook.Logger('get_prev_balance')
+    logger.notice(f"entering get_prev_balance()")
     """this needs altering to use the date of the last
     pge bill recd"""
     exec_str = f"""
@@ -669,21 +679,27 @@ def get_prev_balance(cur, acct_id, date):
         AND date < ?
     """
     params = (acct_id, date)
+    logger.trace(f"{exec_str}")
+    logger.trace(f"{params}")
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 
 
 def get_new_charges(cur, acct_id, date):
+    logger = logbook.Logger('get_new_charges')
+    logger.notice('entering get_new_charges')
     const = constants.Constants()
 
     exec_str = f"""
         SELECT SUM(amount)
         FROM activity
         WHERE acct = ?
-        AND type IN (?, ?)
+        AND type IN (?, ?, ?)
         AND date >= ?
     """
-    params = (acct_id, const.pge_bill_share, const.savings_assessment, date)
+    params = (acct_id, const.pge_bill_share, const.savings_assessment, const.administrative_fee_share, date)
+    logger.trace(f"{exec_str}")
+    logger.trace(params)
     row = cur.execute(exec_str, params)
     return row.fetchone()[0]
 
