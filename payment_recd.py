@@ -61,5 +61,5 @@ def main():
 
 
 if __name__ == "__main__":
-    utils.init_logging('payment_recd.log')
+    utils.init_logging('logs/payment_recd.log')
     main()
