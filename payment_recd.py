@@ -1,7 +1,5 @@
 import sqlite3
-
 import logbook
-
 from lib import utils
 from lib import constants
 
@@ -15,7 +13,7 @@ def main():
 
     acct = utils.prompt_for_account("Please choose an account", cur)
     #
-    # show the current balance here
+    # show the account's current balance here
     # fetch balance and display
     cur_balance = utils.get_acct_balance(acct, cur)
     if cur_balance == 0:
@@ -31,9 +29,10 @@ def main():
     amt *= -1
 
     # cobble together the account note
-    notes = "Payment on account ("
+    # changed this to be multi-line so the payment method can
+    # a little longer .... 2019.06.21
+    notes = "Payment on account|"
     notes += utils.prompt_for_notes("Check number")
-    notes += ")"
 
     payment_logger.debug(date)
     payment_logger.debug(amt)
@@ -44,7 +43,7 @@ def main():
     utils.backup_file(db)
 
     const = constants.Constants()
-    # insert the account
+    # insert the payment into the DB
     cur.execute(
         "INSERT INTO activity (date, acct, type, amount, note) VALUES (?, ?, ?, ?, ?)",
         (date, acct, const.payment_received, amt, notes),
