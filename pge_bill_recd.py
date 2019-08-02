@@ -157,6 +157,11 @@ def main():
         else:
             logger.trace(f"No assessment needed.")
 
+    # added this to make the savings deposit easier
+    # 2019.07.21
+    print(f"==============================================")
+    print(f"assessment_total: {assessment_total}")
+    print(f"==============================================")
     # save, then close the cursor and db
     db.commit()
     cur.close()

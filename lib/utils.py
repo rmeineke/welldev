@@ -294,7 +294,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         SELECT *
         FROM activity
         WHERE (acct = ?)
-        AND (date >= ?)
+        AND (date > ?)
     """
     params = (acct_obj.acct_id, monthly_global_variables["start_date"])
     rows = cur.execute(exec_str, params)
@@ -466,8 +466,11 @@ def prompt_for_account(prompt, cur) -> str:
     rows = cur.fetchall()
     acct_list = []
     for r in rows:
-        print(f"{r[0]}: {r[2]}")
-        acct_list.append(r[0])
+        # show only the active accounts / 2019.07.20
+        # print(f"{r}")
+        if r[7] == 'yes':
+            print(f"{r[0]}: {r[2]}")
+            acct_list.append(r[0])
 
     while True:
         acct = input(f"{prompt}: ")
@@ -676,7 +679,7 @@ def get_prev_balance(cur, acct_id, date):
         SELECT SUM(amount)
         FROM activity
         WHERE acct = ?
-        AND date < ?
+        AND date <= ?
     """
     params = (acct_id, date)
     logger.trace(f"{exec_str}")
@@ -695,7 +698,7 @@ def get_new_charges(cur, acct_id, date):
         FROM activity
         WHERE acct = ?
         AND type IN (?, ?, ?)
-        AND date >= ?
+        AND date > ?
     """
     params = (acct_id, const.pge_bill_share, const.savings_assessment, const.administrative_fee_share, date)
     logger.trace(f"{exec_str}")

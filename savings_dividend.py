@@ -1,28 +1,13 @@
-import logging
-import sys
 import sqlite3
 from lib import utils
 from lib import constants
-
+import logbook
 
 def main():
     database = 'well.sqlite'
-
-    # set up for logging
-    LEVELS = {'debug': logging.DEBUG,
-              'info': logging.INFO,
-              'warning': logging.WARNING,
-              'error': logging.ERROR,
-              'critical': logging.CRITICAL,
-              }
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    logger = logging.getLogger()
+    logger = logbook.Logger("savings_dividend")
     logger.debug('Entering main')
-    utils.backup_file(logger, database)
+    utils.backup_file(database)
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
     cur = db.cursor()
@@ -46,9 +31,9 @@ def main():
     print(f"===============================================")
 
     # get date_paid
-    dividend_date = utils.prompt_for_current_date(logger, "Date of dividend")
+    dividend_date = utils.prompt_for_current_date("Date of dividend")
     # get amount
-    dividend_amount = utils.prompt_for_amount(logger, "Amount of dividend")
+    dividend_amount = utils.prompt_for_amount("Amount of dividend")
     # prompt for notes ... 'Dep for Jan 2019' ... or similar
     note = f"Savings dividend"
 
@@ -69,7 +54,6 @@ def main():
             OR type = (?)
         """
     params = (const.savings_deposit_made, const.savings_disbursement, const.savings_dividend)
-    print(f"{params}")
     cur.execute(exec_str, params)
     current_savings_balance = cur.fetchone()[0]
     logger.debug(f"current_savings_balance: {current_savings_balance}")
@@ -84,4 +68,5 @@ def main():
 
 
 if __name__ == '__main__':
+    utils.init_logging("logs/savings_dividend.log")
     main()
