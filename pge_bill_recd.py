@@ -159,8 +159,10 @@ def main():
 
     # added this to make the savings deposit easier
     # 2019.07.21
+    #
+    # 2019.08.24 ... this needed reformatting
     print(f"==============================================")
-    print(f"assessment_total: {assessment_total}")
+    print(f"assessment_total: ${assessment_total / 100:10.2f}")
     print(f"==============================================")
     # save, then close the cursor and db
     db.commit()

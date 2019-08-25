@@ -29,7 +29,7 @@ def main():
     last_assessment_ttl = cur.fetchone()[0]
     last_assessment_ttl = last_assessment_ttl / 100
     print(f"===============================================")
-    print(f" last assessments totaled: ${last_assessment_ttl:.2f}")
+    print(f" last assessments totaled: ${last_assessment_ttl:12.2f}")
 
     exec_str = f"""
         SELECT SUM(amount)
@@ -46,7 +46,7 @@ def main():
         current_savings_balance = 0
     logger.trace(f"current_savings_balance: {current_savings_balance}")
     print(f"===============================================")
-    print(f" current savings balance: ${current_savings_balance / 100:,.2f}")
+    print(f" current savings balance: ${current_savings_balance / 100:12,.2f}")
     print(f"===============================================")
 
     # get date_paid

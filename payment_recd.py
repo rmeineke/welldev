@@ -32,7 +32,7 @@ def main():
     # changed this to be multi-line so the payment method can
     # a little longer .... 2019.06.21
     notes = "Payment on account|"
-    notes += utils.prompt_for_notes("Check number")
+    notes += utils.prompt_for_notes("Payment notes")
 
     payment_logger.debug(date)
     payment_logger.debug(amt)
