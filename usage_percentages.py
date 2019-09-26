@@ -60,7 +60,8 @@ def main():
         percents_total += a.current_usage_percent
 
     logger.trace(f"\n{'percents_total:':19} ... {percents_total:9.2f}%\n")
-
+    print(f"")
+    print(f"{'percents_total':20}...  {percents_total:8.2f}%")
     # close the cursor and db
     cur.close()
     db.close()
