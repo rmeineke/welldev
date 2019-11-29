@@ -294,7 +294,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
         SELECT *
         FROM activity
         WHERE (acct = ?)
-        AND (date > ?)
+        AND (date >= ?)
     """
     params = (acct_obj.acct_id, monthly_global_variables["start_date"])
     rows = cur.execute(exec_str, params)
@@ -675,11 +675,14 @@ def get_prev_balance(cur, acct_id, date):
     logger.notice(f"entering get_prev_balance()")
     """this needs altering to use the date of the last
     pge bill recd"""
+    """still not quite right .... trying date < ?
+    2019.11.28
+    """
     exec_str = f"""
         SELECT SUM(amount)
         FROM activity
         WHERE acct = ?
-        AND date <= ?
+        AND date < ?
     """
     params = (acct_id, date)
     logger.trace(f"{exec_str}")

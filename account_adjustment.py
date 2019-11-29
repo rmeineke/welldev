@@ -28,14 +28,14 @@ def main():
     cur = db.cursor()
 
     logger.debug('attempting to backup the database file now')
-    utils.backup_file(logger, database)
+    utils.backup_file(database)
 
     const = constants.Constants()
-    account = utils.prompt_for_account(logger, 'Choose the affected account', cur)
-    adjustment_date = utils.prompt_for_current_date(logger, 'Adjustment date')
-    adjustment_amount = utils.prompt_for_amount(logger, 'Adjustment amount')
+    account = utils.prompt_for_account('Choose the affected account', cur)
+    adjustment_date = utils.prompt_for_current_date('Adjustment date')
+    adjustment_amount = utils.prompt_for_amount('Adjustment amount')
     # adjustment_amount *= -1
-    adjustment_note = utils.prompt_for_notes(logger, 'Adjustment note')
+    adjustment_note = utils.prompt_for_notes('Adjustment note')
     logger.debug(f'account: {account}')
     adjustment_date = f"{adjustment_date}"
     logger.debug(f'adjustment_date: {adjustment_date}')

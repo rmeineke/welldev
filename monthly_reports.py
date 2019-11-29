@@ -119,6 +119,9 @@ def main():
         monthly_global_variables["ttl_monthly_usage"] += acct_obj.current_usage
 
         # get and set the previous balance
+        logger.trace(f" * * * Setting the prev_balance")
+        logger.trace(f"start_date: {start_date}")
+        logger.trace(f" * * * Setting the prev_balance")
         prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
         if prev_balance is None:
             prev_balance = 0

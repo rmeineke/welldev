@@ -28,9 +28,9 @@ def main():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    rebate_date = utils.prompt_for_current_date(logger, "Rebate date")
-    rebate_amount = utils.prompt_for_amount(logger, "Rebate amount")
-    rebate_note = utils.prompt_for_notes(logger, "Notes")
+    rebate_date = utils.prompt_for_current_date("Rebate date")
+    rebate_amount = utils.prompt_for_amount("Rebate amount")
+    rebate_note = utils.prompt_for_notes("Notes")
 
     const = constants.Constants()
     exec_str = f"""
@@ -39,7 +39,7 @@ def main():
     params = (rebate_date, const._misc_rebate_received, rebate_amount, rebate_note)
     cur.execute(exec_str, params)
     logger.debug("attempting to backup the database file now")
-    utils.backup_file(logger, database)
+    utils.backup_file(database)
         
     # save, then close the cursor and db
     db.commit()

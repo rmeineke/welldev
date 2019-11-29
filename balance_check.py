@@ -3,7 +3,7 @@ from lib import utils
 
 
 def main():
-    database = 'well.sqlite'
+    database = "well.sqlite"
 
     db = sqlite3.connect(database)
     db.row_factory = sqlite3.Row
@@ -20,6 +20,6 @@ def main():
     db.close()
 
 
-if __name__ == '__main__':
-    utils.init_logging('logs/balance_check.log')
+if __name__ == "__main__":
+    utils.init_logging("logs/balance_check.log")
     main()
