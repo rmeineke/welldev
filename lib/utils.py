@@ -290,6 +290,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
     pdf.ln(2)
     pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
     pdf.ln(lh)
+    # changed date from > to >=
     exec_str: str = f"""
         SELECT *
         FROM activity
@@ -327,7 +328,7 @@ def generate_pdf(cur, acct_obj, monthly_global_variables, savings_data_list):
 
         # TODO: this is to replace the above .... test on 6/20
         pdf.cell(col_width * 2, 0, f"{notes[0]}")
-        value = row['amount'] / 100
+        value = row["amount"] / 100
         # if line_item amount is negative .... put the minus sign outside the
         # $ sign .... -$6.93
         if value < 0:
@@ -468,7 +469,7 @@ def prompt_for_account(prompt, cur) -> str:
     for r in rows:
         # show only the active accounts / 2019.07.20
         # print(f"{r}")
-        if r[7] == 'yes':
+        if r[7] == "yes":
             print(f"{r[0]}: {r[2]}")
             acct_list.append(r[0])
 
@@ -671,13 +672,8 @@ def get_last_two_reading_dates(cur):
 
 
 def get_prev_balance(cur, acct_id, date):
-    logger = logbook.Logger('get_prev_balance')
+    logger = logbook.Logger("get_prev_balance")
     logger.notice(f"entering get_prev_balance()")
-    """this needs altering to use the date of the last
-    pge bill recd"""
-    """still not quite right .... trying date < ?
-    2019.11.28
-    """
     exec_str = f"""
         SELECT SUM(amount)
         FROM activity
@@ -692,8 +688,8 @@ def get_prev_balance(cur, acct_id, date):
 
 
 def get_new_charges(cur, acct_id, date):
-    logger = logbook.Logger('get_new_charges')
-    logger.notice('entering get_new_charges')
+    logger = logbook.Logger("get_new_charges")
+    logger.notice("entering get_new_charges")
     const = constants.Constants()
 
     exec_str = f"""
@@ -701,9 +697,15 @@ def get_new_charges(cur, acct_id, date):
         FROM activity
         WHERE acct = ?
         AND type IN (?, ?, ?)
-        AND date > ?
+        AND date >= ?
     """
-    params = (acct_id, const.pge_bill_share, const.savings_assessment, const.administrative_fee_share, date)
+    params = (
+        acct_id,
+        const.pge_bill_share,
+        const.savings_assessment,
+        const.administrative_fee_share,
+        date,
+    )
     logger.trace(f"{exec_str}")
     logger.trace(params)
     row = cur.execute(exec_str, params)

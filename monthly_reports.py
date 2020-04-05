@@ -7,7 +7,7 @@ from lib import constants
 
 def main():
     database = "well.sqlite"
-    logger = logbook.Logger('reports')
+    logger = logbook.Logger("reports")
 
     # this dictionary will hold the variables that are needed
     # to process each account's nothing activity
@@ -62,15 +62,13 @@ def main():
         const.savings_deposit_made,
         const.savings_dividend,
         const.savings_disbursement,
-        monthly_global_variables["start_date"]
+        monthly_global_variables["start_date"],
     )
     logger.trace(params)
     rows = cur.execute(exec_str, params)
     savings_data_list = []
     for row in rows:
-        logger.trace(
-            f"{row['type']} - {row['date']} - {row['amount']} - {row['note']}"
-        )
+        logger.trace(f"{row['type']} - {row['date']} - {row['amount']} - {row['note']}")
         data_list = []
         if row["type"] == const.savings_deposit_made:
             data_list.append("Deposit made")
@@ -87,7 +85,9 @@ def main():
     rows = cur.fetchall()
 
     for r in rows:
-        logger.trace(f"=======================================================================")
+        logger.trace(
+            f"======================================================================="
+        )
 
         if r["active"] == "no":
             logger.trace(f"account {r['acct_id']} is INACTIVE")
@@ -104,7 +104,7 @@ def main():
             r["file_alias"],
             r["address"],
             r["reads_in"],
-            r["master"]
+            r["master"],
         )
         acct_list.append(acct_obj)
 
@@ -119,31 +119,40 @@ def main():
         monthly_global_variables["ttl_monthly_usage"] += acct_obj.current_usage
 
         # get and set the previous balance
+        # TODO: i think this needs to use the latest reading date...
         logger.trace(f" * * * Setting the prev_balance")
         logger.trace(f"start_date: {start_date}")
         logger.trace(f" * * * Setting the prev_balance")
-        prev_balance = utils.get_prev_balance(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
+        prev_balance = utils.get_prev_balance(
+            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+        )
         if prev_balance is None:
             prev_balance = 0
         acct_obj.prev_balance = prev_balance
         logger.trace(f"prev_balance: {prev_balance}")
 
         # adjustments?
-        adjustments = utils.get_adjustments(cur, acct_obj.acct_id, last_pge_bill_recd_date)
+        adjustments = utils.get_adjustments(
+            cur, acct_obj.acct_id, last_pge_bill_recd_date
+        )
         if adjustments is None:
             adjustments = 0
         acct_obj.adjustments = adjustments
         logger.trace(f"adjustments: {adjustments}")
 
         # fetch pge bill share
-        pge_bill_share = utils.get_pge_share(cur, acct_obj.acct_id, last_pge_bill_recd_date)
+        pge_bill_share = utils.get_pge_share(
+            cur, acct_obj.acct_id, last_pge_bill_recd_date
+        )
         if pge_bill_share is None:
             pge_bill_share = 0
         acct_obj.pge_bill_share = pge_bill_share
         logger.trace(f"pge_bill_share: {pge_bill_share}")
 
         # check for any payments made
-        payments = utils.get_payments(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
+        payments = utils.get_payments(
+            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+        )
         if payments is None:
             payments = 0
         acct_obj.payments = payments
@@ -153,7 +162,9 @@ def main():
 
         # this is just new pge shares and assessments and new fees...
         # new charges
-        new_charges = utils.get_new_charges(cur, acct_obj.acct_id, monthly_global_variables["start_date"])
+        new_charges = utils.get_new_charges(
+            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+        )
         if new_charges is None:
             new_charges = 0
         acct_obj.new_charges = new_charges
@@ -168,9 +179,7 @@ def main():
     logger.trace(f"{monthly_global_variables['ttl_monthly_usage']}")
 
     for acct in acct_list:
-        utils.generate_pdf(
-            cur, acct, monthly_global_variables, savings_data_list
-        )
+        utils.generate_pdf(cur, acct, monthly_global_variables, savings_data_list)
 
     # save, then close the cursor and db
     db.commit()
@@ -179,5 +188,5 @@ def main():
 
 
 if __name__ == "__main__":
-    utils.init_logging('logs/reports.log')
+    utils.init_logging("logs/reports.log")
     main()
