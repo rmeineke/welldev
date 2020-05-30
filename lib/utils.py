@@ -678,7 +678,7 @@ def get_prev_balance(cur, acct_id, date):
         SELECT SUM(amount)
         FROM activity
         WHERE acct = ?
-        AND date < ?
+        AND date <= ?
     """
     params = (acct_id, date)
     logger.trace(f"{exec_str}")
@@ -733,7 +733,7 @@ def get_payments(cur, acct_id, date):
         FROM activity
         WHERE acct = ?
         AND type = ?
-        AND date >= ?
+        AND date > ?
     """
     params = (acct_id, const.payment_received, date)
     row = cur.execute(exec_str, params)

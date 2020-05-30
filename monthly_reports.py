@@ -41,9 +41,13 @@ def main():
 
     # collect relevant dates
     dates = utils.get_last_two_reading_dates(cur)
+    logger.trace(f"dates --> {dates}")
     start_date = dates[1]
+    logger.trace(f"start_date --> {start_date}")
     monthly_global_variables["start_date"] = start_date
     end_date = dates[0]
+    logger.trace(f"end_date --> {end_date}")
+
     monthly_global_variables["end_date"] = end_date
     readable_start_date = utils.make_date_readable(start_date)
     monthly_global_variables["readable_start_date"] = readable_start_date
@@ -123,8 +127,11 @@ def main():
         logger.trace(f" * * * Setting the prev_balance")
         logger.trace(f"start_date: {start_date}")
         logger.trace(f" * * * Setting the prev_balance")
+        logger.trace(
+            f"get_prev_balance is going to use {monthly_global_variables['end_date']}"
+        )
         prev_balance = utils.get_prev_balance(
-            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+            cur, acct_obj.acct_id, monthly_global_variables["start_date"]
         )
         if prev_balance is None:
             prev_balance = 0
@@ -151,7 +158,7 @@ def main():
 
         # check for any payments made
         payments = utils.get_payments(
-            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+            cur, acct_obj.acct_id, monthly_global_variables["start_date"]
         )
         if payments is None:
             payments = 0
