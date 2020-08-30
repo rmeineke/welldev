@@ -697,7 +697,7 @@ def get_new_charges(cur, acct_id, date):
         FROM activity
         WHERE acct = ?
         AND type IN (?, ?, ?)
-        AND date >= ?
+        AND date > ?
     """
     params = (
         acct_id,

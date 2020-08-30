@@ -170,7 +170,7 @@ def main():
         # this is just new pge shares and assessments and new fees...
         # new charges
         new_charges = utils.get_new_charges(
-            cur, acct_obj.acct_id, monthly_global_variables["end_date"]
+            cur, acct_obj.acct_id, monthly_global_variables["start_date"]
         )
         if new_charges is None:
             new_charges = 0
